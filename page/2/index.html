@@ -402,6 +402,113 @@
 
 
   
+    <article id="post-java-util-Arrays用法例子" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/26/java-util-Arrays用法例子/">java.util.Arrays用法例子</a>
+    </h1>
+  
+
+        
+        <a href="/2016/12/26/java-util-Arrays用法例子/" class="archive-article-date">
+  	<time datetime="2016-12-26T06:39:18.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-12-26</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>这个类在日常的开发中，还是非常常用的。今天就总结一下Arrays工具类的常用方法。最常用的就是asList,sort,toStream,equals,copyOf了。另外可以深入学习下Arrays的排序算法，这个还是非常有用的。</p>
+</blockquote>
+<p>所有的方法都是在下面的类中进行测试的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public class ArraysTest &#123;</span><br><span class="line">    String[] array = new String[]&#123;&quot;a&quot;,&quot;c&quot;,&quot;2&quot;,&quot;1&quot;,&quot;b&quot;&#125;;</span><br><span class="line">    Integer[] ints = new Integer[]&#123;5,1,4,3,2&#125;;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="asList"><a href="#asList" class="headerlink" title="asList"></a>asList</h4><p>这个方法可以把数组转换成List,List提供了很多的操作方法，更便于使用。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@Test</span><br><span class="line">public void test1()&#123;</span><br><span class="line">    List&lt;String&gt; lists = Arrays.asList(array);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="sort排序和parallelSort并行排序"><a href="#sort排序和parallelSort并行排序" class="headerlink" title="sort排序和parallelSort并行排序"></a>sort排序和parallelSort并行排序</h4><p>sort比较常用了，根据元素按照自然排序规则排序，也可以设置排序元素的起始位置。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">@Test</span><br><span class="line">public void sort()&#123;</span><br><span class="line">   /* Arrays.sort(array);</span><br><span class="line">    for(String str : array)&#123;</span><br><span class="line">        System.out.println(str);</span><br><span class="line">    &#125;*/</span><br><span class="line">    Arrays.sort(array,2,5);</span><br><span class="line">    System.out.println(Arrays.deepToString(array));//[a, c, 1, 2, b]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>parallelSort则采用并行的排序算法排序.但是我自己测试，可能数据量太小，速度上并没有明显的变化。</p>
+<h4 id="binarySearch"><a href="#binarySearch" class="headerlink" title="binarySearch"></a>binarySearch</h4><p>查找目标元素所在的位置，注意需要先进行排序。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">@Test</span><br><span class="line">public void binarySearch()&#123;</span><br><span class="line">    //binarySearch需要保证是排好序的</span><br><span class="line">    System.out.println(Arrays.binarySearch(array,&quot;c&quot;));//-6</span><br><span class="line">    Arrays.sort(array);</span><br><span class="line">    System.out.println(Arrays.binarySearch(array,&quot;c&quot;));//4</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="copyOf"><a href="#copyOf" class="headerlink" title="copyOf"></a>copyOf</h4><p>拷贝数组，第一种用法，如果目标长度不够，会使用0进行补位。第二种用法，支持拷贝目标起始位置到结束为止的数组。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">@Test</span><br><span class="line">public void copyOf()&#123;</span><br><span class="line">    //如果位数不够，需要补位</span><br><span class="line">    Integer[] result = Arrays.copyOf(ints,10);</span><br><span class="line">    for(int i : result)&#123;</span><br><span class="line">        System.out.println(i);</span><br><span class="line">    &#125;</span><br><span class="line">    System.out.println(&quot;-----------------------------------------&gt;&quot;);</span><br><span class="line">    //如果位数够，就取最小的数组</span><br><span class="line">    result = Arrays.copyOf(ints,3);</span><br><span class="line">    for(int i : result)&#123;</span><br><span class="line">        System.out.println(i);</span><br><span class="line">    &#125;</span><br><span class="line">    System.out.println(&quot;-----------------------------------------&gt;&quot;);</span><br><span class="line">    //</span><br><span class="line">    result = Arrays.copyOfRange(ints,2,4);</span><br><span class="line">    for(int i : result)&#123;</span><br><span class="line">        System.out.println(i);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="deepEquals深度比较、deepHashCode生成hashcode、deepToString深度打印"><a href="#deepEquals深度比较、deepHashCode生成hashcode、deepToString深度打印" class="headerlink" title="deepEquals深度比较、deepHashCode生成hashcode、deepToString深度打印"></a>deepEquals深度比较、deepHashCode生成hashcode、deepToString深度打印</h4><p>这几个方法基本都是采用递归的写法使用。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">@Test</span><br><span class="line">public void deepTest()&#123;</span><br><span class="line">    String[] array2 = new String[]&#123;&quot;a&quot;,&quot;c&quot;,&quot;2&quot;,&quot;1&quot;,&quot;b&quot;&#125;;</span><br><span class="line">    System.out.println(Arrays.deepEquals(array,array2));//深度比较两个数组是否相同</span><br><span class="line"></span><br><span class="line">    System.out.println(Arrays.deepHashCode(array));</span><br><span class="line">    System.out.println(Arrays.deepHashCode(array2));//如果两个数组deepEquals，那么他们的hashcode一定相同</span><br><span class="line"></span><br><span class="line">    //格式化输出数组</span><br><span class="line">    System.out.println(Arrays.deepToString(array));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="equals比较"><a href="#equals比较" class="headerlink" title="equals比较"></a>equals比较</h4><p>对比两个数组是否相等<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">@Test</span><br><span class="line">public void equals()&#123;</span><br><span class="line">    String[] array2 = new String[]&#123;&quot;a&quot;,&quot;c&quot;,&quot;2&quot;,&quot;1&quot;,&quot;b&quot;&#125;;</span><br><span class="line"></span><br><span class="line">    //1 对比引用是否相同</span><br><span class="line">    //2 对比是否存在null</span><br><span class="line">    //3 对比长度是否相同</span><br><span class="line">    //4 挨个元素对比</span><br><span class="line">    System.out.println(Arrays.equals(array,array2));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="fill"><a href="#fill" class="headerlink" title="fill"></a>fill</h4><p>基于目标元素填充数组</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">@Test</span><br><span class="line">public void fill()&#123;</span><br><span class="line">    Arrays.fill(array,&quot;test&quot;);</span><br><span class="line">    System.out.println(Arrays.deepToString(array));//[test, test, test, test, test]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="toString-NaN"><a href="#toString-NaN" class="headerlink" title="toString"></a>toString</h4><p>打印数组元素</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@Test</span><br><span class="line">public void string()&#123;</span><br><span class="line">    System.out.println(Arrays.toString(array));//[a, c, 2, 1, b]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="toStream"><a href="#toStream" class="headerlink" title="toStream"></a>toStream</h4><p>把数组转换成stream,然后可以使用java8的stream特性了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@Test</span><br><span class="line">public void toStream()&#123;</span><br><span class="line">    Arrays.stream(array).forEach(s-&gt; System.out.println(s));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="parallelPrefix"><a href="#parallelPrefix" class="headerlink" title="parallelPrefix"></a>parallelPrefix</h4><p>这个有点像spark的reduceByKey，即根据传入的方法一次计算：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">@Test</span><br><span class="line">public void parallelPrefix()&#123;</span><br><span class="line">    Arrays.parallelPrefix(ints,(x,y)-&gt;(x+y));</span><br><span class="line">    System.out.println(Arrays.deepToString(ints));//[5, 6, 10, 13, 15]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="parallelSetAll"><a href="#parallelSetAll" class="headerlink" title="parallelSetAll"></a>parallelSetAll</h4><p>这个方法相当于stream.map会挨个元素遍历执行方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">@Test</span><br><span class="line">public void parallelSetAll()&#123;</span><br><span class="line">    Arrays.parallelSetAll(ints,x-&gt;x*x);</span><br><span class="line">    System.out.println(Arrays.toString(ints));//[0, 1, 4, 9, 16]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="setAll"><a href="#setAll" class="headerlink" title="setAll"></a>setAll</h4><p>这个方法与上面类似，只不过不是并行的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">@Test</span><br><span class="line">public void setAll()&#123;</span><br><span class="line">    Arrays.setAll(ints,x-&gt;x*2);</span><br><span class="line">    System.out.println(Arrays.toString(ints));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">java</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/技术//" class="article-tag-list-link color3">技术</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2016/12/26/java-util-Arrays用法例子/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
