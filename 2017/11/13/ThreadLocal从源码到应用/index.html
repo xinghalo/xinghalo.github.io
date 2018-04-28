@@ -6,16 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://xinghalo.github.io">
-  <title>Tag: 闲扯 | xingoo的blog</title>
+  <title>ThreadLocal从源码到应用 | xingoo的blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="keywords" content="xingoo">
-<meta property="og:type" content="website">
-<meta property="og:title" content="xingoo的blog">
-<meta property="og:url" content="https://xinghalo.github.io/tags/闲扯/index.html">
+  <meta name="description" content="最早接触到ThreadLocal是在阅读dianping的Cat-client，当时对它不是很理解，就搜索了一下，大概了解是一种解决线程安全问题的机制。现在再次阅读《实战java高并发程序设计》时，又重新对它有了更深一步的了解。  并发程序很重要的主题就是解决多线程安全的问题，最常见的处理办法就是引入锁的机制；但是锁使得各个线程对临界区的使用效率变差，于是有了一种新的思路，即每个线程独立管理某个">
+<meta name="keywords" content="java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ThreadLocal从源码到应用">
+<meta property="og:url" content="https://xinghalo.github.io/2017/11/13/ThreadLocal从源码到应用/index.html">
 <meta property="og:site_name" content="xingoo的blog">
+<meta property="og:description" content="最早接触到ThreadLocal是在阅读dianping的Cat-client，当时对它不是很理解，就搜索了一下，大概了解是一种解决线程安全问题的机制。现在再次阅读《实战java高并发程序设计》时，又重新对它有了更深一步的了解。  并发程序很重要的主题就是解决多线程安全的问题，最常见的处理办法就是引入锁的机制；但是锁使得各个线程对临界区的使用效率变差，于是有了一种新的思路，即每个线程独立管理某个">
 <meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-04-28T04:25:00.440Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="xingoo的blog">
+<meta name="twitter:title" content="ThreadLocal从源码到应用">
+<meta name="twitter:description" content="最早接触到ThreadLocal是在阅读dianping的Cat-client，当时对它不是很理解，就搜索了一下，大概了解是一种解决线程安全问题的机制。现在再次阅读《实战java高并发程序设计》时，又重新对它有了更深一步的了解。  并发程序很重要的主题就是解决多线程安全的问题，最常见的处理办法就是引入锁的机制；但是锁使得各个线程对临界区的使用效率变差，于是有了一种新的思路，即每个线程独立管理某个">
   
     <link rel="alternative" href="/atom.xml" title="xingoo的blog" type="application/atom+xml">
   
@@ -155,71 +159,199 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-ThreadLocal从源码到应用" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2018" class="archive-year">2018</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/04/27/第一篇/" class="archive-article-date">
-  	<time datetime="2018-04-27T01:25:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-27</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/04/27/第一篇/">第一篇</a>
+    <h1 class="article-title" itemprop="name">
+      ThreadLocal从源码到应用
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2017/11/13/ThreadLocal从源码到应用/" class="archive-article-date">
+  	<time datetime="2017-11-13T04:23:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-11-13</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>最早接触到ThreadLocal是在阅读dianping的Cat-client，当时对它不是很理解，就搜索了一下，大概了解是一种解决线程安全问题的机制。现在再次阅读《实战java高并发程序设计》时，又重新对它有了更深一步的了解。</p>
+</blockquote>
+<p>并发程序很重要的主题就是解决多线程安全的问题，最常见的处理办法就是引入锁的机制；但是锁使得各个线程对临界区的使用效率变差，于是有了一种新的思路，即每个线程独立管理某个变量，变量的修改在线程中时独立的。就好比，以前锁的机制是100个人签到，只有一个签字薄；而现在ThreadLocal是每个人一张纸。</p>
+<p>不过上面的场景，只是threadLocal的一个应用场景。还有个例子，是在城市里面倒车。小明去上班要先做公交车在做地铁，如果每次坐车都买票，那么时间效率很差。于是小明办理了一张通用的公交卡，公交车和地铁都可以刷。而小蓝小红也有这样的公交卡，它们的公交卡彼此之间是独立的。这就是ThreadLocal的作用！</p>
+<p>总结来说，threadLocal有两点作用：</p>
+<ol>
+<li>多个线程之间独立</li>
+<li>单个线程对某个变量随时随地使用</li>
+</ol>
+<p>那么它的原理时什么样的呢？</p>
+<p>说白了，就是每个线程自己有一个Map，这个Map采用了线性探测法来存储变量。接下来主要阅读下代码吧:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">public T get() &#123;</span><br><span class="line">    Thread t = Thread.currentThread();</span><br><span class="line">    // 获取当前线程的localmap</span><br><span class="line">    ThreadLocalMap map = getMap(t);</span><br><span class="line">    if (map != null) &#123;</span><br><span class="line">        // 用当前的变量作为key查询对象</span><br><span class="line">        ThreadLocalMap.Entry e = map.getEntry(this);</span><br><span class="line">        if (e != null) &#123;</span><br><span class="line">            @SuppressWarnings(&quot;unchecked&quot;)</span><br><span class="line">            T result = (T)e.value;</span><br><span class="line">            return result;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    // 如果不存在的话，初始化变量</span><br><span class="line">    return setInitialValue();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public void set(T value) &#123;</span><br><span class="line">    Thread t = Thread.currentThread();</span><br><span class="line">    ThreadLocalMap map = getMap(t);</span><br><span class="line">    if (map != null)</span><br><span class="line">        map.set(this, value);</span><br><span class="line">    else</span><br><span class="line">        createMap(t, value);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>主要时那个getEntry方法:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">private Entry getEntry(ThreadLocal&lt;?&gt; key) &#123;</span><br><span class="line">    // 通过当前key的hashcode与列表的长度做 &amp;操作，判断存储的位置</span><br><span class="line">    int i = key.threadLocalHashCode &amp; (table.length - 1);</span><br><span class="line">    Entry e = table[i];</span><br><span class="line">    if (e != null &amp;&amp; e.get() == key)</span><br><span class="line">        return e;</span><br><span class="line">    else</span><br><span class="line">        // 如果不存在的话，进入getEntryAfterMiss方法</span><br><span class="line">        // 这种情况，可能是key被回收掉了；也可能是hash冲突了</span><br><span class="line">        return getEntryAfterMiss(key, i, e);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private Entry getEntryAfterMiss(ThreadLocal&lt;?&gt; key, int i, Entry e) &#123;</span><br><span class="line">    Entry[] tab = table;</span><br><span class="line">    int len = tab.length;</span><br><span class="line"></span><br><span class="line">    // 这里是典型的线性地址探测法，如果当前有值，👎</span><br><span class="line">    while (e != null) &#123;</span><br><span class="line">        ThreadLocal&lt;?&gt; k = e.get();</span><br><span class="line">        if (k == key)</span><br><span class="line">            return e;</span><br><span class="line">        if (k == null)</span><br><span class="line">            expungeStaleEntry(i);</span><br><span class="line">        else</span><br><span class="line">            i = nextIndex(i, len);</span><br><span class="line">        e = tab[i];</span><br><span class="line">    &#125;</span><br><span class="line">    return null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">闲扯</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">java</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/生活//" class="article-tag-list-link color3">生活</a>
+        			<a href="/categories/技术//" class="article-tag-list-link color3">技术</a>
         		</li>
       		
 		</ul>
 	</div>
 
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://xinghalo.github.io/2017/11/13/ThreadLocal从源码到应用/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2017/11/15/volatile的作用/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          volatile的作用
+        
+      </div>
+    </a>
   
   
-    </div></section>
+    <a href="/2017/10/28/Java基础之-equals-hashcode和数据类型/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Java基础之== equals hashcode和数据类型</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -242,9 +374,9 @@
 	var yiliaConfig = {
 		mathjax: true,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,

@@ -6,16 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://xinghalo.github.io">
-  <title>Tag: 闲扯 | xingoo的blog</title>
+  <title>接口与抽象类,枚举与泛型 | xingoo的blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="keywords" content="xingoo">
-<meta property="og:type" content="website">
-<meta property="og:title" content="xingoo的blog">
-<meta property="og:url" content="https://xinghalo.github.io/tags/闲扯/index.html">
+  <meta name="description" content="抽象类与接口抽象类通常是描述一些对象的通用方法和属性，并且默认实现一些功能，它不能被实例化。接口仅仅是描述一种方法的规约，即只能通过某几个方法来操作对象，它把内部的实现隐藏到实现类中，自己仅仅关注使用而已。    参数 抽象类 接口     默认的方法实现 它可以有默认的方法实现 接口完全是抽象的。它根本不存在方法的实现   实现 子类使用extends关键字来继承抽象类。如果子类不是抽象类的话，">
+<meta name="keywords" content="java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="接口与抽象类,枚举与泛型">
+<meta property="og:url" content="https://xinghalo.github.io/2018/10/29/接口与抽象类/index.html">
 <meta property="og:site_name" content="xingoo的blog">
+<meta property="og:description" content="抽象类与接口抽象类通常是描述一些对象的通用方法和属性，并且默认实现一些功能，它不能被实例化。接口仅仅是描述一种方法的规约，即只能通过某几个方法来操作对象，它把内部的实现隐藏到实现类中，自己仅仅关注使用而已。    参数 抽象类 接口     默认的方法实现 它可以有默认的方法实现 接口完全是抽象的。它根本不存在方法的实现   实现 子类使用extends关键字来继承抽象类。如果子类不是抽象类的话，">
 <meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-04-28T04:46:57.977Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="xingoo的blog">
+<meta name="twitter:title" content="接口与抽象类,枚举与泛型">
+<meta name="twitter:description" content="抽象类与接口抽象类通常是描述一些对象的通用方法和属性，并且默认实现一些功能，它不能被实例化。接口仅仅是描述一种方法的规约，即只能通过某几个方法来操作对象，它把内部的实现隐藏到实现类中，自己仅仅关注使用而已。    参数 抽象类 接口     默认的方法实现 它可以有默认的方法实现 接口完全是抽象的。它根本不存在方法的实现   实现 子类使用extends关键字来继承抽象类。如果子类不是抽象类的话，">
   
     <link rel="alternative" href="/atom.xml" title="xingoo的blog" type="application/atom+xml">
   
@@ -155,71 +159,259 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-接口与抽象类" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2018" class="archive-year">2018</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/04/27/第一篇/" class="archive-article-date">
-  	<time datetime="2018-04-27T01:25:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-27</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/04/27/第一篇/">第一篇</a>
+    <h1 class="article-title" itemprop="name">
+      接口与抽象类,枚举与泛型
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2018/10/29/接口与抽象类/" class="archive-article-date">
+  	<time datetime="2018-10-29T04:41:22.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-10-29</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="抽象类与接口"><a href="#抽象类与接口" class="headerlink" title="抽象类与接口"></a>抽象类与接口</h1><p>抽象类通常是描述一些对象的通用方法和属性，并且默认实现一些功能，它不能被实例化。接口仅仅是描述一种方法的规约，即只能通过某几个方法来操作对象，它把内部的实现隐藏到实现类中，自己仅仅关注使用而已。</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>抽象类</th>
+<th>接口</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>默认的方法实现</td>
+<td>它可以有默认的方法实现</td>
+<td>接口完全是抽象的。它根本不存在方法的实现</td>
+</tr>
+<tr>
+<td>实现</td>
+<td>子类使用extends关键字来继承抽象类。如果子类不是抽象类的话，它需要提供抽象类中所有声明的方法的实现。</td>
+<td>子类使用关键字implements来实现接口。它需要提供接口中所有声明的方法的实现</td>
+</tr>
+<tr>
+<td>构造器</td>
+<td>抽象类可以有构造器</td>
+<td>接口不能有构造器</td>
+</tr>
+<tr>
+<td>与正常Java类的区别</td>
+<td>除了你不能实例化抽象类之外，它和普通Java类没有任何区别</td>
+<td>接口是完全不同的类型</td>
+</tr>
+<tr>
+<td>访问修饰符</td>
+<td>抽象方法可以有public、protected和default这些修饰符</td>
+<td>接口方法默认修饰符是public。你不可以使用其它修饰符</td>
+</tr>
+<tr>
+<td>main方法</td>
+<td>抽象方法可以有main方法并且我们可以运行它</td>
+<td>接口没有main方法，因此我们不能运行它。</td>
+</tr>
+<tr>
+<td>多继承</td>
+<td>抽象方法可以继承一个类和实现多个接口</td>
+<td>接口只可以继承一个或多个其它接口</td>
+</tr>
+<tr>
+<td>速度</td>
+<td>它比接口速度要快</td>
+<td>接口是稍微有点慢的，因为它需要时间去寻找在类中实现的方法。</td>
+</tr>
+<tr>
+<td>添加新方法</td>
+<td>如果你往抽象类中添加新的方法，你可以给它提供默认的实现。因此你不需要改变你现在的代码。</td>
+<td>如果你往接口中添加方法，那么你必须改变实现该接口的类。</td>
+</tr>
+</tbody>
+</table>
+<h1 id="枚举"><a href="#枚举" class="headerlink" title="枚举"></a>枚举</h1><p>平时代码中总是有一些特殊的变量，这些变量有一些类似的特点。比如程咬金的被动技能是舍生忘死，一技能是爆裂双斧；钟无艳的被动技能是石之炼金，一技能是狂飙突进。如果每次都用字符串的形式，代码就会显得很乱。这时候就可以使用enum，enum枚举不仅仅可以表示简单的形式，还可以封装复杂的类型。</p>
+<p>比如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">public enum KingHeros &#123;</span><br><span class="line">    ChengYaojin,</span><br><span class="line">    ZhongWuYan,</span><br><span class="line">    LiBai;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class KingHerosTest1 &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        System.out.println(KingHeros.ZhongWuYan);</span><br><span class="line">        System.out.println(KingHeros.valueOf(&quot;ZhongWuYan&quot;));</span><br><span class="line">        System.out.println(KingHeros.values());</span><br><span class="line">        System.out.println(KingHeros.ZhongWuYan.equals(KingHeros.valueOf(&quot;ZhongWuYan&quot;)));</span><br><span class="line">        caseTest(KingHeros.ZhongWuYan);</span><br><span class="line">    &#125;</span><br><span class="line">    /**</span><br><span class="line">     * switch的使用</span><br><span class="line">     * @param kingHeros</span><br><span class="line">     */</span><br><span class="line">    public static void caseTest(KingHeros kingHeros)&#123;</span><br><span class="line">        switch (kingHeros)&#123;</span><br><span class="line">            case ChengYaojin:</span><br><span class="line">                System.out.println(&quot;我是程咬金&quot;);</span><br><span class="line">                break;</span><br><span class="line">            case ZhongWuYan:</span><br><span class="line">                System.out.println(&quot;我是钟无艳&quot;);</span><br><span class="line">                break;</span><br><span class="line">            case LiBai:</span><br><span class="line">                System.out.println(&quot;我是李白&quot;);</span><br><span class="line">                break;</span><br><span class="line">            default:</span><br><span class="line">                System.out.println(&quot;我是NPC&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>输出内容：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ZhongWuYan</span><br><span class="line">ZhongWuYan</span><br><span class="line">[Lxingoo.test.KingHeros;@452b3a41</span><br><span class="line">true</span><br><span class="line">我是钟无艳</span><br></pre></td></tr></table></figure></p>
+<p>上面只是枚举最简单的用法，它还可以支持复杂的类型。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">public enum KingHeros &#123;</span><br><span class="line">    ChengYaojin(&quot;程咬金&quot;,&quot;舍生忘死&quot;,&quot;爆裂双斧&quot;),</span><br><span class="line">    ZhongWuYan(&quot;钟无艳&quot;,&quot;石之炼金&quot;,&quot;狂飙突进&quot;);</span><br><span class="line"></span><br><span class="line">    private String name;</span><br><span class="line">    private String beidong;</span><br><span class="line">    private String yijineng;</span><br><span class="line"></span><br><span class="line">    private KingHeros(String name, String beidong, String yijineng)&#123;</span><br><span class="line">        this.name = name;</span><br><span class="line">        this.beidong = beidong;</span><br><span class="line">        this.yijineng = yijineng;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public String getName() &#123;</span><br><span class="line">        return name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void setName(String name) &#123;</span><br><span class="line">        this.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public String getBeidong() &#123;</span><br><span class="line">        return beidong;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void setBeidong(String beidong) &#123;</span><br><span class="line">        this.beidong = beidong;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public String getYijineng() &#123;</span><br><span class="line">        return yijineng;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void setYijineng(String yijineng) &#123;</span><br><span class="line">        this.yijineng = yijineng;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void 自我介绍()&#123;</span><br><span class="line">        System.out.println(&quot;我叫&quot;+name+&quot;，我的被动是&quot;+beidong+&quot;，我的一技能是&quot;+yijineng);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">public class KingHerosTest1 &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        KingHeros.ChengYaojin.自我介绍();</span><br><span class="line">        KingHeros.ZhongWuYan.自我介绍();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>输出内容是<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">我叫程咬金，我的被动是舍生忘死，我的一技能是爆裂双斧</span><br><span class="line">我叫钟无艳，我的被动是石之炼金，我的一技能是狂飙突进</span><br></pre></td></tr></table></figure></p>
+<p>这种枚举的使用方法可以良好的组织代码，非常有用。</p>
+<p>参考 <a href="http://www.cnblogs.com/zhaoyanjun/p/5659811.html" target="_blank" rel="noopener">java枚举</a></p>
+<h1 id="泛型"><a href="#泛型" class="headerlink" title="泛型"></a>泛型</h1><p>泛型是类型参数化的一种使用方法，最常用在集合类中。如果阅读集合类的代码，可以看到大量的泛型。</p>
+<p>泛型只是在编译期起作用的一种机制，主要是为了限制集合类存储的类型。以免一个集合内既有字符串又有数字，结果在使用的时候会有很大的困扰。如果使用泛型会有一个叫做反醒擦除的概念，就是再编译期间，把泛型擦出掉，替换成对应的类型。比如<code>List&lt;?&gt;</code>替换成<code>List&lt;Object&gt;</code>；<code>List&lt;? extends Number&gt;</code> 替换成<code>List&lt;Number&gt;</code>。</p>
+<p>另外，泛型有几种定义方法：</p>
+<ol>
+<li>范型上限：Person&lt;? extends Number&gt; 接受继承Number的任何类</li>
+<li>范型下限：Person&lt;? super Number&gt; 接受Nunber以及其父类</li>
+<li>Person&lt;?&gt;可以接受任何类型，但是不能修改</li>
+</ol>
+<p>参考 <a href="http://blog.csdn.net/sunxianghuang/article/details/51982979" target="_blank" rel="noopener">Java泛型深入理解</a></p>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">闲扯</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">java</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/生活//" class="article-tag-list-link color3">生活</a>
+        			<a href="/categories/技术//" class="article-tag-list-link color3">技术</a>
         		</li>
       		
 		</ul>
 	</div>
 
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://xinghalo.github.io/2018/10/29/接口与抽象类/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2018/11/02/HashMap源码分析/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          HashMap源码分析
+        
+      </div>
+    </a>
   
   
-    </div></section>
+    <a href="/2018/10/24/JVM内存模型与垃圾回收/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">JVM内存模型与垃圾回收</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -242,9 +434,9 @@
 	var yiliaConfig = {
 		mathjax: true,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,

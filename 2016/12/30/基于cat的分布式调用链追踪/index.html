@@ -6,16 +6,22 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://xinghalo.github.io">
-  <title>Tag: 闲扯 | xingoo的blog</title>
+  <title>基于cat的分布式调用链追踪 | xingoo的blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="keywords" content="xingoo">
-<meta property="og:type" content="website">
-<meta property="og:title" content="xingoo的blog">
-<meta property="og:url" content="https://xinghalo.github.io/tags/闲扯/index.html">
+  <meta name="description" content="Cat是美团点评出的一款APM工具，同类的产品也有不少，知名的开源产品如zipkin和pinpoint；国内收费的产品如oneapm。考虑到Cat在互联网公司的应用比较广，因此被纳入选型队列，我也有幸参与技术预言。 使用Cat断断续续将近两周的时间，感觉它还算是很轻量级的。文档相对来说薄弱一些，没有太全面的官方文档（官方文档大多是介绍每个名词是什么意思，界面是什么意思，部署方面比较欠缺）；但是好在">
+<meta name="keywords" content="java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于cat的分布式调用链追踪">
+<meta property="og:url" content="https://xinghalo.github.io/2016/12/30/基于cat的分布式调用链追踪/index.html">
 <meta property="og:site_name" content="xingoo的blog">
+<meta property="og:description" content="Cat是美团点评出的一款APM工具，同类的产品也有不少，知名的开源产品如zipkin和pinpoint；国内收费的产品如oneapm。考虑到Cat在互联网公司的应用比较广，因此被纳入选型队列，我也有幸参与技术预言。 使用Cat断断续续将近两周的时间，感觉它还算是很轻量级的。文档相对来说薄弱一些，没有太全面的官方文档（官方文档大多是介绍每个名词是什么意思，界面是什么意思，部署方面比较欠缺）；但是好在">
 <meta property="og:locale" content="default">
+<meta property="og:image" content="http://unidal.org/cat/images/logviewAll02.png">
+<meta property="og:updated_time" content="2018-04-28T05:05:10.699Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="xingoo的blog">
+<meta name="twitter:title" content="基于cat的分布式调用链追踪">
+<meta name="twitter:description" content="Cat是美团点评出的一款APM工具，同类的产品也有不少，知名的开源产品如zipkin和pinpoint；国内收费的产品如oneapm。考虑到Cat在互联网公司的应用比较广，因此被纳入选型队列，我也有幸参与技术预言。 使用Cat断断续续将近两周的时间，感觉它还算是很轻量级的。文档相对来说薄弱一些，没有太全面的官方文档（官方文档大多是介绍每个名词是什么意思，界面是什么意思，部署方面比较欠缺）；但是好在">
+<meta name="twitter:image" content="http://unidal.org/cat/images/logviewAll02.png">
   
     <link rel="alternative" href="/atom.xml" title="xingoo的blog" type="application/atom+xml">
   
@@ -155,71 +161,226 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-基于cat的分布式调用链追踪" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2018" class="archive-year">2018</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/04/27/第一篇/" class="archive-article-date">
-  	<time datetime="2018-04-27T01:25:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-27</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/04/27/第一篇/">第一篇</a>
+    <h1 class="article-title" itemprop="name">
+      基于cat的分布式调用链追踪
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2016/12/30/基于cat的分布式调用链追踪/" class="archive-article-date">
+  	<time datetime="2016-12-30T05:04:24.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-12-30</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Cat是美团点评出的一款APM工具，同类的产品也有不少，知名的开源产品如zipkin和pinpoint；国内收费的产品如oneapm。考虑到Cat在互联网公司的应用比较广，因此被纳入选型队列，我也有幸参与技术预言。</p>
+<p>使用Cat断断续续将近两周的时间，感觉它还算是很轻量级的。文档相对来说薄弱一些，没有太全面的官方文档（官方文档大多是介绍每个名词是什么意思，界面是什么意思，部署方面比较欠缺）；但是好在有一个非常活跃的群，群里有很多经验丰富的高手，不会的问题基本都能得到解答。</p>
+<p>下面就开始步入正题吧，本篇主要讲述一下如何利用Cat进行分布式的调用链追踪。</p>
+<h2 id="分布式开发基础"><a href="#分布式开发基础" class="headerlink" title="分布式开发基础"></a>分布式开发基础</h2><p>在最开始网站基本都是单节点的，由于业务逐渐发展，使用者开始增多，单节点已经无法支撑了。于是开始切分系统，把系统拆分成几个独立的模块，模块之间采用远程调用的方式进行通信。</p>
+<p>那么远程调用是如何做到的呢？下面就用最古老的RMI的方式来举个例子吧！</p>
+<p>RMI（Remote method invocation）是java从1.1就开始支持的功能，它支持跨进程间的方法调用。</p>
+<p>大体上的原理可以理解为，服务端会持续监听一个端口。客户端通过proxy代理的方式远程调用服务端。即客户端会把方法的参数以字符串的的方式序列化传给服务端。服务端反序列化后调用本地的方法执行，执行结果再序列化返回给客户端。</p>
+<p>服务端的代码可以参考如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">IBusiness</span> <span class="keyword">extends</span> <span class="title">Remote</span></span>&#123;</span><br><span class="line">    <span class="function">String <span class="title">echo</span><span class="params">(String message)</span> <span class="keyword">throws</span> RemoteException</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BusinessImpl</span> <span class="keyword">extends</span> <span class="title">UnicastRemoteObject</span> <span class="keyword">implements</span>  <span class="title">IBusiness</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BusinessImpl</span><span class="params">()</span> <span class="keyword">throws</span> RemoteException </span>&#123;&#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">echo</span><span class="params">(String message)</span> <span class="keyword">throws</span> RemoteException </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"hello,"</span>+message;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RpcServer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> RemoteException, AlreadyBoundException, MalformedURLException </span>&#123;</span><br><span class="line">        IBusiness business = <span class="keyword">new</span> BusinessImpl();</span><br><span class="line">        LocateRegistry.createRegistry(<span class="number">8888</span>);</span><br><span class="line">        Naming.bind(<span class="string">"rmi://localhost:8888/Business"</span>,business);</span><br><span class="line">        System.out.println(<span class="string">"Hello, RMI Server!"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>客户端的代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">IBusiness business = (IBusiness) Naming.lookup(&quot;rmi://localhost:8888/Business&quot;);</span><br><span class="line">            business.echo(&quot;xingoo&quot;,ctx);</span><br></pre></td></tr></table></figure></p>
+<p>上面的例子就可以实现客户端跨进程调用的例子。</p>
+<h2 id="Cat监控"><a href="#Cat监控" class="headerlink" title="Cat监控"></a>Cat监控</h2><p>Cat的监控跟传统的APM产品差不多，模式都是相似的，需要一个agent在客户端进行埋点，然后把数据发送给服务端，服务端进行解析并存储。只要你埋点足够全，那么它是可以进行全面监控的。监控到的数据会首先按照某种规则进行消息的合并，合并成一个MessageTree，这个MessageTree会被放入BlockingQueue里面，这样就解决了多线程数据存储的问题。</p>
+<p>队列会限制存储的MessageTree的个数，但是如果服务端挂掉，客户端也有可能因为堆积大量的心跳而导致内存溢出（心跳是Cat客户端自动向服务端发出的，里面包含了jvm本地磁盘IO等很多的内容，所以MesssageTree挺大的）。</p>
+<p>因此数据在客户端的流程可以理解为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Trasaction\Event--&gt;MessageTree--&gt;BlockingQueue--&gt;netty发出网络流</span><br></pre></td></tr></table></figure>
+<p>即Transaction、Event等消息会先合并为消息树，以消息树为单位存储在内存中（并未进行本地持久化），专门有一个TcpSocketSender负责向外发送数据。</p>
+<p>再说说服务端，服务端暂时看的不深，大体上可以理解为专门有一个TcpSocketReciever接收数据，由于数据在传输过程中是需要序列化的。因此接收后首先要进行decode，生成消息树。然后把消息放入BlockingQueue，有分析器不断的来队列拿消息树进行分析，分析后按照一定的规则把报表存储到数据库，把原始数据存储到本地文件中(默认是存储到本地)。</p>
+<p>因此数据在服务端的流程大致可以理解为：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">网络流--&gt;decode反序列化--&gt;BlockingQueue--&gt;analyzer分析---&gt;报表存储在DB</span><br><span class="line">                                                    |----&gt;原始数据存储在本地或hdfs</span><br></pre></td></tr></table></figure></p>
+<h2 id="简单的Transaction例子"><a href="#简单的Transaction例子" class="headerlink" title="简单的Transaction例子"></a>简单的Transaction例子</h2><p>在Cat里面，消息大致可以分为几个类型：</p>
+<ul>
+<li>Transaction 有可能出错、需要记录处理的时间的监控，比如SQL查询、URL访问等</li>
+<li>Event 普通的监控，没有处理时间的要求，比如一次偶然的异常，一些基本的信息</li>
+<li>Hearbeat 心跳检测，常常用于一些基本的指标监控，一般是一分钟一次</li>
+<li>Metric 指标，比如有一个值，每次访问都要加一，就可以使用它</li>
+</ul>
+<p>Transaction支持嵌套，即可以作为消息树的根节点，也可以作为叶子节点。但是Event、Heartbeat和Metric只能作为叶子节点。有了这种树形结构，就可以描述出下面这种调用链的结果了：<br><img src="http://unidal.org/cat/images/logviewAll02.png" alt=""></p>
+<p>Transaction和Event的使用很简单，比如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">@RequestMapping(&quot;t&quot;)</span><br><span class="line">   public @ResponseBody String test() &#123;</span><br><span class="line">       Transaction t = Cat.newTransaction(&quot;MY-TRANSACTION&quot;,&quot;test in TransactionTest&quot;);</span><br><span class="line">       try&#123;</span><br><span class="line">           Cat.logEvent(&quot;EVENT-TYPE-1&quot;,&quot;EVENT-NAME-1&quot;);</span><br><span class="line"></span><br><span class="line">           // ....</span><br><span class="line"></span><br><span class="line">       &#125;catch(Exception e)&#123;</span><br><span class="line">           Cat.logError(e);</span><br><span class="line">           t.setStatus(e);</span><br><span class="line">       &#125;finally &#123;</span><br><span class="line">           t.setStatus(Transaction.SUCCESS);</span><br><span class="line">           t.complete();</span><br><span class="line">       &#125;</span><br><span class="line">       return &quot;trasaction test!&quot;;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure></p>
+<p>这是一个最基本的Transaction的例子。</p>
+<h2 id="分布式调用链监控"><a href="#分布式调用链监控" class="headerlink" title="分布式调用链监控"></a>分布式调用链监控</h2><p>在分布式环境中，应用是运行在独立的进程中的，有可能是不同的机器，或者不同的服务器进程。那么他们如果想要彼此联系在一起，形成一个调用链，就需要通过几个ID进行串联。这种串联的模式，基本上都是一样的。</p>
+<p>举个例子，A系统在aaa()中调用了B系统的bbb()方法，如果我们在aaa方法中埋点记录上面例子中的信息，在bbb中也记录信息，但是这两个信息是彼此独立的。因此就需要使用一个全局的id，证明他们是一个调用链中的调用方法。除此之外，还需要一个标识谁在调用它的ID，以及一个标识它调用的方法的ID。</p>
+<p>总结来说，每个Transaction需要三个ID：</p>
+<ul>
+<li>RootId，用于标识唯一的一个调用链</li>
+<li>ParentId，父Id是谁？谁在调用我</li>
+<li>ChildId，我在调用谁?</li>
+</ul>
+<p>其实ParentId和ChildId有点冗余，但是Cat里面还是都加上吧！</p>
+<p>那么问题来了，如何传递这些ID呢？在Cat中需要你自己实现一个Context，因为Cat里面只提供了一个内部的接口：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public interface Context &#123;</span><br><span class="line">        String ROOT = &quot;_catRootMessageId&quot;;</span><br><span class="line">        String PARENT = &quot;_catParentMessageId&quot;;</span><br><span class="line">        String CHILD = &quot;_catChildMessageId&quot;;</span><br><span class="line"></span><br><span class="line">        void addProperty(String var1, String var2);</span><br><span class="line"></span><br><span class="line">        String getProperty(String var1);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>我们需要自己实现这个接口，并存储相关的ID：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">public class MyContext implements Cat.Context,Serializable&#123;</span><br><span class="line"></span><br><span class="line">    private static final long serialVersionUID = 7426007315111778513L;</span><br><span class="line"></span><br><span class="line">    private Map&lt;String,String&gt; properties = new HashMap&lt;String,String&gt;();</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void addProperty(String s, String s1) &#123;</span><br><span class="line">        properties.put(s,s1);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public String getProperty(String s) &#123;</span><br><span class="line">        return properties.get(s);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>由于这个Context需要跨进程网络传输，因此需要实现序列化接口。</p>
+<p>在Cat中其实已经给我们实现了两个方法<code>logRemoteCallClient</code>以及<code>logRemoteCallServer</code>，可以简化处理逻辑,有兴趣可以看一下Cat中的逻辑实现：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">//客户端需要创建一个Context，然后初始化三个ID</span><br><span class="line">public static void logRemoteCallClient(Cat.Context ctx) &#123;</span><br><span class="line">        MessageTree tree = getManager().getThreadLocalMessageTree();</span><br><span class="line">        String messageId = tree.getMessageId();//获取当前的MessageId</span><br><span class="line">        if(messageId == null) &#123;</span><br><span class="line">            messageId = createMessageId();</span><br><span class="line">            tree.setMessageId(messageId);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        String childId = createMessageId();//创建子MessageId</span><br><span class="line">        logEvent(&quot;RemoteCall&quot;, &quot;&quot;, &quot;0&quot;, childId);</span><br><span class="line">        String root = tree.getRootMessageId();//获取全局唯一的MessageId</span><br><span class="line">        if(root == null) &#123;</span><br><span class="line">            root = messageId;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        ctx.addProperty(&quot;_catRootMessageId&quot;, root);</span><br><span class="line">        ctx.addProperty(&quot;_catParentMessageId&quot;, messageId);//把自己的ID作为ParentId传给调用的方法</span><br><span class="line">        ctx.addProperty(&quot;_catChildMessageId&quot;, childId);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">//服务端需要接受这个context，然后设置到自己的Transaction中</span><br><span class="line">public static void logRemoteCallServer(Cat.Context ctx) &#123;</span><br><span class="line">        MessageTree tree = getManager().getThreadLocalMessageTree();</span><br><span class="line">        String messageId = ctx.getProperty(&quot;_catChildMessageId&quot;);</span><br><span class="line">        String rootId = ctx.getProperty(&quot;_catRootMessageId&quot;);</span><br><span class="line">        String parentId = ctx.getProperty(&quot;_catParentMessageId&quot;);</span><br><span class="line">        if(messageId != null) &#123;</span><br><span class="line">            tree.setMessageId(messageId);//把传过来的子ID作为自己的ID</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        if(parentId != null) &#123;</span><br><span class="line">            tree.setParentMessageId(parentId);//把传过来的parentId作为</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        if(rootId != null) &#123;</span><br><span class="line">            tree.setRootMessageId(rootId);//把传过来的RootId设置成自己的RootId</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>这样，结合前面的RMI调用，整个思路就清晰多了.</p>
+<p>客户端调用者的埋点：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">@RequestMapping(&quot;t2&quot;)</span><br><span class="line">    public @ResponseBody String test2() &#123;</span><br><span class="line">        Transaction t = Cat.newTransaction(&quot;Call&quot;,&quot;test2&quot;);</span><br><span class="line">        try&#123;</span><br><span class="line">            Cat.logEvent(&quot;Call.server&quot;,&quot;localhost&quot;);</span><br><span class="line">            Cat.logEvent(&quot;Call.app&quot;,&quot;business&quot;);</span><br><span class="line">            Cat.logEvent(&quot;Call.port&quot;,&quot;8888&quot;);</span><br><span class="line"></span><br><span class="line">            MyContext ctx = new MyContext();</span><br><span class="line">            Cat.logRemoteCallClient(ctx);</span><br><span class="line"></span><br><span class="line">            IBusiness business = (IBusiness) Naming.lookup(&quot;rmi://localhost:8888/Business&quot;);</span><br><span class="line">            business.echo(&quot;xingoo&quot;,ctx);</span><br><span class="line">        &#125;catch(Exception e)&#123;</span><br><span class="line">            Cat.logError(e);</span><br><span class="line">            t.setStatus(e);</span><br><span class="line">        &#125;finally &#123;</span><br><span class="line">            t.setStatus(Transaction.SUCCESS);</span><br><span class="line">            t.complete();</span><br><span class="line">        &#125;</span><br><span class="line">        return &quot;cross!&quot;;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>远程被调用者的埋点：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">interface IBusiness extends Remote&#123;</span><br><span class="line">    String echo(String message,MyContext ctx) throws RemoteException;</span><br><span class="line">&#125;</span><br><span class="line">class BusinessImpl extends UnicastRemoteObject implements  IBusiness &#123;</span><br><span class="line">    public BusinessImpl() throws RemoteException &#123;&#125;</span><br><span class="line">    @Override</span><br><span class="line">    public String echo(String message,MyContext ctx) throws RemoteException &#123;</span><br><span class="line">        Transaction t = Cat.newTransaction(&quot;Service&quot;,&quot;echo&quot;);</span><br><span class="line">        try&#123;</span><br><span class="line">            Cat.logEvent(&quot;Service.client&quot;,&quot;localhost&quot;);</span><br><span class="line">            Cat.logEvent(&quot;Service.app&quot;,&quot;cat-client&quot;);</span><br><span class="line">            Cat.logRemoteCallServer(ctx);</span><br><span class="line">            System.out.println(message);</span><br><span class="line">        &#125;catch(Exception e)&#123;</span><br><span class="line">            Cat.logError(e);</span><br><span class="line">            t.setStatus(e);</span><br><span class="line">        &#125;finally &#123;</span><br><span class="line">            t.setStatus(Transaction.SUCCESS);</span><br><span class="line">            t.complete();</span><br><span class="line">        &#125;</span><br><span class="line">        return &quot;hello,&quot;+message;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">public class RpcServer &#123;</span><br><span class="line">    public static void main(String[] args) throws RemoteException, AlreadyBoundException, MalformedURLException &#123;</span><br><span class="line">        IBusiness business = new BusinessImpl();</span><br><span class="line">        LocateRegistry.createRegistry(8888);</span><br><span class="line">        Naming.bind(&quot;rmi://localhost:8888/Business&quot;,business);</span><br><span class="line">        System.out.println(&quot;Hello, RMI Server!&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>需要注意的是，Service的client和app需要和Call的server以及app对应上，要不然图表是分析不出东西的！</p>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>Cat对于一些分布式的开源框架，都有很好的集成，比如dubbo，有兴趣的可以查看它在script中的文档，结合上面的例子可以更好地理解。</p>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">闲扯</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">java</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/生活//" class="article-tag-list-link color3">生活</a>
+        			<a href="/categories/技术//" class="article-tag-list-link color3">技术</a>
         		</li>
       		
 		</ul>
 	</div>
 
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://xinghalo.github.io/2016/12/30/基于cat的分布式调用链追踪/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2017/01/09/java中的引用类型，强软弱虚/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          java中的引用类型，强软弱虚
+        
+      </div>
+    </a>
   
   
-    </div></section>
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -242,9 +403,9 @@
 	var yiliaConfig = {
 		mathjax: true,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,
