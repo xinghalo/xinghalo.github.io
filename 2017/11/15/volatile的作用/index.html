@@ -6,20 +6,23 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://xinghalo.github.io">
-  <title>第一篇 | xingoo的blog</title>
+  <title>volatile的作用 | xingoo的blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="hello">
-<meta name="keywords" content="闲扯">
+  <meta name="description" content="众所周知，volatile关键字可以让线程的修改立刻通知其他的线程，从而达到数据一致的作用。那么它具体涉及到哪些内容呢？  关于缓存计算机最大的存储空间就是磁盘（硬盘），但是访问的速度也是最慢的，价格最便宜；再就是内存，容量更小，造价更高，但是速度也更快。不过跟cpu的计算速度比起来，那就太慢了。可以想像，如果cpu每次计算都要从内存读取数据，那大部分的时间估计都浪费在这上面了。所以就引入了缓存">
+<meta name="keywords" content="java">
 <meta property="og:type" content="article">
-<meta property="og:title" content="第一篇">
-<meta property="og:url" content="https://xinghalo.github.io/2018/04/27/第一篇/index.html">
+<meta property="og:title" content="volatile的作用">
+<meta property="og:url" content="https://xinghalo.github.io/2017/11/15/volatile的作用/index.html">
 <meta property="og:site_name" content="xingoo的blog">
-<meta property="og:description" content="hello">
+<meta property="og:description" content="众所周知，volatile关键字可以让线程的修改立刻通知其他的线程，从而达到数据一致的作用。那么它具体涉及到哪些内容呢？  关于缓存计算机最大的存储空间就是磁盘（硬盘），但是访问的速度也是最慢的，价格最便宜；再就是内存，容量更小，造价更高，但是速度也更快。不过跟cpu的计算速度比起来，那就太慢了。可以想像，如果cpu每次计算都要从内存读取数据，那大部分的时间估计都浪费在这上面了。所以就引入了缓存">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-04-28T02:39:38.614Z">
+<meta property="og:image" content="http://jbcdn2.b0.upaiyun.com/2013/03/214.png">
+<meta property="og:image" content="http://jbcdn2.b0.upaiyun.com/2013/03/38.png">
+<meta property="og:updated_time" content="2018-04-28T03:27:15.223Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="第一篇">
-<meta name="twitter:description" content="hello">
+<meta name="twitter:title" content="volatile的作用">
+<meta name="twitter:description" content="众所周知，volatile关键字可以让线程的修改立刻通知其他的线程，从而达到数据一致的作用。那么它具体涉及到哪些内容呢？  关于缓存计算机最大的存储空间就是磁盘（硬盘），但是访问的速度也是最慢的，价格最便宜；再就是内存，容量更小，造价更高，但是速度也更快。不过跟cpu的计算速度比起来，那就太慢了。可以想像，如果cpu每次计算都要从内存读取数据，那大部分的时间估计都浪费在这上面了。所以就引入了缓存">
+<meta name="twitter:image" content="http://jbcdn2.b0.upaiyun.com/2013/03/214.png">
   
     <link rel="alternative" href="/atom.xml" title="xingoo的blog" type="application/atom+xml">
   
@@ -159,27 +162,58 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-第一篇" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-volatile的作用" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      第一篇
+      volatile的作用
     </h1>
   
 
         
-        <a href="/2018/04/27/第一篇/" class="archive-article-date">
-  	<time datetime="2018-04-27T01:25:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-27</time>
+        <a href="/2017/11/15/volatile的作用/" class="archive-article-date">
+  	<time datetime="2017-11-15T03:26:29.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-11-15</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>hello</p>
+        <blockquote>
+<p>众所周知，volatile关键字可以让线程的修改立刻通知其他的线程，从而达到数据一致的作用。那么它具体涉及到哪些内容呢？</p>
+</blockquote>
+<h1 id="关于缓存"><a href="#关于缓存" class="headerlink" title="关于缓存"></a>关于缓存</h1><p>计算机最大的存储空间就是磁盘（硬盘），但是访问的速度也是最慢的，价格最便宜；再就是内存，容量更小，造价更高，但是速度也更快。不过跟cpu的计算速度比起来，那就太慢了。可以想像，如果cpu每次计算都要从内存读取数据，那大部分的时间估计都浪费在这上面了。所以就引入了缓存的概：</p>
+<p><img src="http://jbcdn2.b0.upaiyun.com/2013/03/214.png" alt=""></p>
+<p>缓存的结构大概时这样的，从1级到3级速度越来越慢，最后通过总线与内存连接。如果时多核多cpu，那么结构大概是这样的：</p>
+<p><img src="http://jbcdn2.b0.upaiyun.com/2013/03/38.png" alt=""></p>
+<h1 id="多线程造成的缓存不一致"><a href="#多线程造成的缓存不一致" class="headerlink" title="多线程造成的缓存不一致"></a>多线程造成的缓存不一致</h1><p>由于现在大部分的机器都有多个cpu，这就导致如果时运行多线程的任务，就可能运行在不同的cpu上。试想一下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">int a = 0;</span><br><span class="line">int b = a;</span><br><span class="line">b += 1;</span><br></pre></td></tr></table></figure></p>
+<p>如果开启两个线程执行，我们想要的结果是3，但是最后的结果只是2。这是因为在做加法运算的时候，cpu会先把a的值读入cpu的缓存，然后更新缓存，在更新内存。很有可能两个线程分散在两个cpu，每个都是对自己缓存内的数据进行读写，这样就造成了结果不一致的现象。</p>
+<h1 id="volatile的作用"><a href="#volatile的作用" class="headerlink" title="volatile的作用"></a>volatile的作用</h1><p>volatile的作用就是当一个线程更新某个volatile声明的变量时，会通知其他的cpu使缓存失效，从而其他cpu想要做更新操作时，需要从内存重新读取数据。具体的通知方式，一种是通过某种协议，比如MESI；再就是对总线加锁，控制变量的读取。具体硬件上怎么个流程，我就搞不清楚了…</p>
+<h1 id="并发"><a href="#并发" class="headerlink" title="并发"></a>并发</h1><p>这里还需要强调的时，并发编程涉及的三个特性：原子性、可见性、有序性。就好像分布式里面的cap一样，需要熟知。先来通俗的描述下：</p>
+<h2 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h2><p>即要么全做，要么全部做。比如从a银行转钱到b银行。</p>
+<p>在编程中，除了long或者double外的变量更新就是原子操作。long和double除外，是因为它们在32位的操作系统上，会被分成两部分进行更新，此时就不是原子的。</p>
+<p>再比如最常见的i++也不是原子的，它相当于先<code>读取i</code>，<code>进行+1操作</code>，<code>更新</code>三个步骤进行。</p>
+<h2 id="可见性"><a href="#可见性" class="headerlink" title="可见性"></a>可见性</h2><p>多个线程访问同一个变量时，这个变量被修改后，能被其他的线程看到。</p>
+<h2 id="有序性"><a href="#有序性" class="headerlink" title="有序性"></a>有序性</h2><p>比如<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">int a = 10; </span><br><span class="line">int r = 2;   </span><br><span class="line">a = a + 3;  </span><br><span class="line">r = a*a;</span><br></pre></td></tr></table></figure></p>
+<p>这段代码有可能进行指令的重排，从而导致结果跟预期的不一致。指令的重排需要按照<code>happens-before</code>原则，比如:</p>
+<ol>
+<li>程序次序原则，一个线程内，按照书写的顺序执行</li>
+<li>锁定原则，lock前后执行</li>
+<li>volatile原则，volatile变量前后执行</li>
+<li>传递原则，如果a需要调用b，那么a就会在b的前面</li>
+</ol>
+<p>…</p>
+<p>等等…</p>
+<h2 id="volatile的特性"><a href="#volatile的特性" class="headerlink" title="volatile的特性"></a>volatile的特性</h2><p>volatile只能保证变量的可见性、有序性，但是不能保证原子性。因此可以用它来做double-check，但是不能来做i++的操作。如果想要实现i++的可靠性，必须依赖于synchronized、lock或者atomicXXX来实现。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
+<li>海子的《Java并发编程：volatile关键字解析》：<a href="http://www.cnblogs.com/dolphin0520/p/3920373.html" target="_blank" rel="noopener">http://www.cnblogs.com/dolphin0520/p/3920373.html</a></li>
+<li>liuxiaopeng的《Java 并发编程：volatile的使用及其原理》：<a href="https://www.cnblogs.com/paddix/p/5428507.html" target="_blank" rel="noopener">https://www.cnblogs.com/paddix/p/5428507.html</a></li>
+<li>double check <a href="http://blog.csdn.net/dl88250/article/details/5439024" target="_blank" rel="noopener">http://blog.csdn.net/dl88250/article/details/5439024</a></li>
+<li>cpu缓存知识：<a href="http://blog.jobbole.com/36263/" target="_blank" rel="noopener">http://blog.jobbole.com/36263/</a></li>
+</ol>
 
       
 
@@ -214,7 +248,7 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">闲扯</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">java</a>
         		</li>
       		
 		</ul>
@@ -226,7 +260,7 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/生活//" class="article-tag-list-link color3">生活</a>
+        			<a href="/categories/技术//" class="article-tag-list-link color3">技术</a>
         		</li>
       		
 		</ul>
@@ -281,7 +315,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=https://xinghalo.github.io/2018/04/27/第一篇/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=https://xinghalo.github.io/2017/11/15/volatile的作用/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -295,11 +329,15 @@
   
 <nav id="article-nav">
   
-  
-    <a href="/2017/11/16/Thread中的sleep-wait-notify-notifyall/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">Thread中的sleep,wait,notify,notifyall</div>
-      <i class="icon-circle-right"></i>
+    <a href="/2017/11/16/Thread中的sleep-wait-notify-notifyall/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          Thread中的sleep,wait,notify,notifyall
+        
+      </div>
     </a>
+  
   
 </nav>
 

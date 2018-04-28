@@ -40,7 +40,7 @@
     <canvas id="anm-canvas" class="anm-canvas"></canvas>
     <div class="left-col" q-class="show:isShow">
       
-<div class="overlay" style="background: #4d4d4d"></div>
+<div class="overlay" style="background: #ffffff"></div>
 <div class="intrude-less">
 	<header id="header" class="inner">
 		<a href="/" class="profilepic">
@@ -95,7 +95,7 @@
     <div class="mid-col" q-class="show:isShow,hide:isShow|isFalse">
       
 <nav id="mobile-nav">
-  	<div class="overlay js-overlay" style="background: #4d4d4d"></div>
+  	<div class="overlay js-overlay" style="background: #ffffff"></div>
 	<div class="btnctn js-mobile-btnctn">
   		<div class="slider-trigger list" q-on="click: openSlider(e)"><i class="icon icon-sort"></i></div>
 	</div>
@@ -242,6 +242,246 @@
 
 
   
+    <article id="post-Thread中的sleep-wait-notify-notifyall" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/11/16/Thread中的sleep-wait-notify-notifyall/">Thread中的sleep,wait,notify,notifyall</a>
+    </h1>
+  
+
+        
+        <a href="/2017/11/16/Thread中的sleep-wait-notify-notifyall/" class="archive-article-date">
+  	<time datetime="2017-11-16T03:22:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-11-16</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>线程是计算程序运行的最小载体，由于单个单核CPU的硬件水平发展到了一定的瓶颈期，因此就出现了多核多CPU的情况，直接就导致程序员多线程编程的复杂。由此可见线程对于高性能开发的重要性。</p>
+</blockquote>
+<p>那么线程在计算机中有好几种状态，他们之间是怎么切换的？sleep和wait又有什么区别？notify和notifyAll怎么用？带着这些问题，我们来看看Java的线程吧！</p>
+<h1 id="Thread的状态"><a href="#Thread的状态" class="headerlink" title="Thread的状态"></a>Thread的状态</h1><p>先来看看Thread类里面都有哪几种状态，在Thread.class中可以找到这个枚举，它定义了线程的相关状态:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public enum State &#123;</span><br><span class="line">    NEW,</span><br><span class="line">    RUNNABLE,</span><br><span class="line">    BLOCKED,</span><br><span class="line">    WAITING,</span><br><span class="line">    TIMED_WAITING,</span><br><span class="line">    TERMINATED;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>如下图所示：<br><img src="https://pic2.zhimg.com/bb4f380c79779c9dc1aea6f0a6c10b6d_r.jpg" alt=""></p>
+<ol>
+<li>NEW 新建状态，线程创建且没有执行start方法时的状态</li>
+<li>RUNNABLE 可运行状态，线程已经启动，但是等待相应的资源（比如IO或者时间片切换）才能开始执行</li>
+<li>BLOCKED 阻塞状态，当遇到synchronized或者lock且没有取得相应的锁，就会进入这个状态</li>
+<li>WAITING 等待状态，当调用<code>Object.wait</code>或者<code>Thread.join()</code>且没有设置时间，在或者<code>LockSupport.park</code>时，都会进入等待状态。</li>
+<li>TIMED_WAITING 计时等待，当调用<code>Thread.sleep()</code>或者<code>Object.wait(xx)</code>或者<code>Thread.join(xx)</code>或者<code>LockSupport.parkNanos</code>或者<code>LockSupport.partUntil</code>时，进入该状态</li>
+<li>TERMINATED 终止状态，线程中断或者运行结束的状态</li>
+</ol>
+<h1 id="先来sleep和wait的区别"><a href="#先来sleep和wait的区别" class="headerlink" title="先来sleep和wait的区别"></a>先来sleep和wait的区别</h1><p>由于wait方法是在Object上的，而sleep方法是在Thread上，当调用Thread.sleep时，并不能改变对象的状态，因此也不会释放锁。</p>
+<p>这让我想起来我家的两个主子，一只泰迪一只美短，虽然他们两个是不同的物种，但是却有着相同的爱好，就是爱吃牛肉。偶尔给它们两个开荤，奈何只有一个食盆，每次只能一个主子吃肉。这就好比是两个线程，在争用同一个变量。如果使用thread.sleep，那么他们吃完后，不会释放锁等资源；如果使用wait，就会释放。</p>
+<p>详细的看一下下面的代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">package cn.xingoo.test.basic.thread;</span><br><span class="line"></span><br><span class="line">public class AnimalEat &#123;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        System.out.println(&quot;盆里有20块肉&quot;);</span><br><span class="line">        Animal animal = new Animal();</span><br><span class="line">        try&#123;</span><br><span class="line">            Thread tidy = new Thread(animal,&quot;泰迪&quot;);</span><br><span class="line">            Thread cat  = new Thread(animal,&quot;美短&quot;);</span><br><span class="line">            tidy.start();</span><br><span class="line">            cat.start();</span><br><span class="line">        &#125;catch (Exception e)&#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(&quot;盆里的肉吃完了！&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">class Animal implements Runnable &#123;</span><br><span class="line">    int count = 0;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        while(count &lt; 20)&#123;</span><br><span class="line">            synchronized (this)&#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName()+&quot;吃力第&quot;+count+&quot;块肉&quot;);</span><br><span class="line">                    count++;</span><br><span class="line">                    //Thread.sleep(100);</span><br><span class="line">                    this.wait(100);</span><br><span class="line">                &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>当使用this.wait(100)的时候，会输出下面的信息：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">盆里有20块肉</span><br><span class="line">泰迪吃力第0块肉</span><br><span class="line">美短吃力第1块肉</span><br><span class="line">盆里的肉吃完了！</span><br><span class="line">泰迪吃力第2块肉</span><br><span class="line">美短吃力第3块肉</span><br><span class="line">泰迪吃力第4块肉</span><br><span class="line">美短吃力第5块肉</span><br><span class="line">泰迪吃力第6块肉</span><br><span class="line">美短吃力第7块肉</span><br><span class="line">泰迪吃力第8块肉</span><br><span class="line">美短吃力第9块肉</span><br><span class="line">泰迪吃力第10块肉</span><br><span class="line">美短吃力第11块肉</span><br><span class="line">美短吃力第12块肉</span><br><span class="line">泰迪吃力第13块肉</span><br><span class="line">美短吃力第14块肉</span><br><span class="line">泰迪吃力第15块肉</span><br><span class="line">美短吃力第16块肉</span><br><span class="line">泰迪吃力第17块肉</span><br><span class="line">美短吃力第18块肉</span><br><span class="line">泰迪吃力第19块肉</span><br></pre></td></tr></table></figure></p>
+<p>可以发现，输出的信息并不是完美的交替，这是因为调用wait之后，并不一定马上时另一个线程执行，而是要根据CPU的时间分片轮转等其他的条件来定，轮到谁就看运气了。</p>
+<p>当使用Thread.sleep(100)的时候，可以得到下面的信息:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">盆里有20块肉</span><br><span class="line">泰迪吃力第0块肉</span><br><span class="line">盆里的肉吃完了！</span><br><span class="line">泰迪吃力第1块肉</span><br><span class="line">泰迪吃力第2块肉</span><br><span class="line">泰迪吃力第3块肉</span><br><span class="line">泰迪吃力第4块肉</span><br><span class="line">泰迪吃力第5块肉</span><br><span class="line">泰迪吃力第6块肉</span><br><span class="line">泰迪吃力第7块肉</span><br><span class="line">泰迪吃力第8块肉</span><br><span class="line">泰迪吃力第9块肉</span><br><span class="line">泰迪吃力第10块肉</span><br><span class="line">泰迪吃力第11块肉</span><br><span class="line">泰迪吃力第12块肉</span><br><span class="line">泰迪吃力第13块肉</span><br><span class="line">泰迪吃力第14块肉</span><br><span class="line">泰迪吃力第15块肉</span><br><span class="line">泰迪吃力第16块肉</span><br><span class="line">泰迪吃力第17块肉</span><br><span class="line">泰迪吃力第18块肉</span><br><span class="line">美短吃力第19块肉</span><br><span class="line">泰迪吃力第20块肉</span><br></pre></td></tr></table></figure></p>
+<p>注意看最后面有一只美短。这是因为synchronized的代码同步时在while循环里面，因此最后一次两个主子都进入到了while里面，然后才开始等待相应的锁。这就导致第19次轮到了另一个主子。</p>
+<p>总结来说，sleep不会释放线程的锁,wait会释放线程的资源。</p>
+<h1 id="再谈谈wait与notify和notifyall"><a href="#再谈谈wait与notify和notifyall" class="headerlink" title="再谈谈wait与notify和notifyall"></a>再谈谈wait与notify和notifyall</h1><p>wait、notify、notifyall这几个一般都一起使用。不过需要注意下面几个重要的点：</p>
+<ol>
+<li>调用wait\notify\notifyall方法时，需要与锁或者synchronized搭配使用，不然会报错<code>java.lang.IllegalMonitorStateException</code>，因为任何时刻，对象的控制权只能一个线程持有，因此调用wait等方法的时候，必须确保对其的控制权。</li>
+<li>如果对简单的对象调用wait等方法，如果对他们进行赋值也会报错，因为赋值相当于修改的原有的对象，因此如果有修改需求可以外面包装一层。</li>
+<li>notify可以唤醒一个在该对象上等待的线程，notifyAll可以唤醒所有等待的线程。</li>
+<li>wait(xxx) 可以挂起线程，并释放对象的资源，等计时结束后自动恢复；wait()则必须要其他线程调用notify或者notifyAll才能唤醒。</li>
+</ol>
+<p>举个通俗点的例子，我记得在高中的时候，每天上午快放学的时候大家都很紧张——因为那个时候小饭馆正好播放一些港台剧，大家就总愿意抢电视机旁边的位置，所以每次快要中午放学的时候，大家都做好冲刺跑步的准备。</p>
+<p>但是有的老师总愿意压堂，搞的大家怨声载道。</p>
+<p>比如，下面这位老师有的时候会用notifyall通知大家集体放学；有的时候会检查背书，背好了，才能走。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line">package cn.xingoo.test.basic.thread;</span><br><span class="line"></span><br><span class="line">public class School &#123;</span><br><span class="line">    private DingLing dingLing = new DingLing(false);</span><br><span class="line"></span><br><span class="line">    class Teacher extends Thread&#123;</span><br><span class="line">        Teacher(String name)&#123;</span><br><span class="line">            super(name);</span><br><span class="line">        &#125;</span><br><span class="line">        @Override</span><br><span class="line">        public void run() &#123;</span><br><span class="line">            //synchronized (dingLing)&#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    dingLing.wait(3000);</span><br><span class="line">                &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">                dingLing.flag = true;</span><br><span class="line"></span><br><span class="line">                System.out.println(&quot;放学啦&quot;);</span><br><span class="line">                dingLing.notifyAll();</span><br><span class="line"></span><br><span class="line">                /*for (int i = 0; i &lt; 3; i++) &#123;</span><br><span class="line">                    System.out.println(&quot;放一个走吧&quot;);</span><br><span class="line">                    dingLing.notify();</span><br><span class="line">                    try &#123;</span><br><span class="line">                        dingLing.wait(1000);</span><br><span class="line">                    &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;*/</span><br><span class="line">           // &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    class Student extends Thread&#123;</span><br><span class="line">        Student(String name)&#123;</span><br><span class="line">            super(name);</span><br><span class="line">        &#125;</span><br><span class="line">        @Override</span><br><span class="line">        public void run()&#123;</span><br><span class="line">            synchronized (dingLing)&#123;</span><br><span class="line">                while(!dingLing.flag)&#123;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName()+&quot;开始等待&quot;);</span><br><span class="line">                    try &#123;</span><br><span class="line">                        dingLing.wait();</span><br><span class="line">                    &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                System.out.println(Thread.currentThread().getName()+&quot;去吃饭啦&quot;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        School school = new School();</span><br><span class="line">        Teacher teacher  = school.new Teacher(&quot;老师&quot;);</span><br><span class="line">        Student zhangsan = school.new Student(&quot;张三&quot;);</span><br><span class="line">        Student lisi     = school.new Student(&quot;李四&quot;);</span><br><span class="line">        Student wangwu   = school.new Student(&quot;王五&quot;);</span><br><span class="line">        teacher.start();</span><br><span class="line">        zhangsan.start();</span><br><span class="line">        lisi.start();</span><br><span class="line">        wangwu.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class DingLing&#123;</span><br><span class="line">    Boolean flag = false;</span><br><span class="line">    public DingLing(Boolean flag)&#123;</span><br><span class="line">        this.flag = flag;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>当老师统一喊放学的时候，即调用<code>dingLing.notifyAll();</code>，会得到下面的输出:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">张三开始等待</span><br><span class="line">李四开始等待</span><br><span class="line">王五开始等待</span><br><span class="line">放学啦</span><br><span class="line">王五去吃饭啦</span><br><span class="line">李四去吃饭啦</span><br><span class="line">张三去吃饭啦</span><br></pre></td></tr></table></figure></p>
+<p>如果检查背书，那么每次老师只会调用一次notify，让一个同学（线程）走（工作）,就会得到下面的输出:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">张三开始等待</span><br><span class="line">李四开始等待</span><br><span class="line">王五开始等待</span><br><span class="line">放一个走吧</span><br><span class="line">张三去吃饭啦</span><br><span class="line">放一个走吧</span><br><span class="line">李四去吃饭啦</span><br><span class="line">放一个走吧</span><br><span class="line">王五去吃饭啦</span><br></pre></td></tr></table></figure></p>
+<p>注意的是，调用wait可以释放dingling的占用，这样才能让别的线程进行检查，如果改成Thread.sleep，有兴趣的童鞋就可以自己去看看效果啦！</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
+<li>最简单的实例说明wait、notify、notifyAll的使用方法：<a href="http://longdick.iteye.com/blog/453615" target="_blank" rel="noopener">http://longdick.iteye.com/blog/453615</a></li>
+<li>Java sleep和wait的区别：<a href="http://www.jb51.net/article/113587.htm" target="_blank" rel="noopener">http://www.jb51.net/article/113587.htm</a></li>
+<li>sleep和wait解惑:<a href="https://www.zhihu.com/question/23328075" target="_blank" rel="noopener">https://www.zhihu.com/question/23328075</a></li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">java</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/技术//" class="article-tag-list-link color3">技术</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2017/11/16/Thread中的sleep-wait-notify-notifyall/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-volatile的作用" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/11/15/volatile的作用/">volatile的作用</a>
+    </h1>
+  
+
+        
+        <a href="/2017/11/15/volatile的作用/" class="archive-article-date">
+  	<time datetime="2017-11-15T03:26:29.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-11-15</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>众所周知，volatile关键字可以让线程的修改立刻通知其他的线程，从而达到数据一致的作用。那么它具体涉及到哪些内容呢？</p>
+</blockquote>
+<h1 id="关于缓存"><a href="#关于缓存" class="headerlink" title="关于缓存"></a>关于缓存</h1><p>计算机最大的存储空间就是磁盘（硬盘），但是访问的速度也是最慢的，价格最便宜；再就是内存，容量更小，造价更高，但是速度也更快。不过跟cpu的计算速度比起来，那就太慢了。可以想像，如果cpu每次计算都要从内存读取数据，那大部分的时间估计都浪费在这上面了。所以就引入了缓存的概：</p>
+<p><img src="http://jbcdn2.b0.upaiyun.com/2013/03/214.png" alt=""></p>
+<p>缓存的结构大概时这样的，从1级到3级速度越来越慢，最后通过总线与内存连接。如果时多核多cpu，那么结构大概是这样的：</p>
+<p><img src="http://jbcdn2.b0.upaiyun.com/2013/03/38.png" alt=""></p>
+<h1 id="多线程造成的缓存不一致"><a href="#多线程造成的缓存不一致" class="headerlink" title="多线程造成的缓存不一致"></a>多线程造成的缓存不一致</h1><p>由于现在大部分的机器都有多个cpu，这就导致如果时运行多线程的任务，就可能运行在不同的cpu上。试想一下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">int a = 0;</span><br><span class="line">int b = a;</span><br><span class="line">b += 1;</span><br></pre></td></tr></table></figure></p>
+<p>如果开启两个线程执行，我们想要的结果是3，但是最后的结果只是2。这是因为在做加法运算的时候，cpu会先把a的值读入cpu的缓存，然后更新缓存，在更新内存。很有可能两个线程分散在两个cpu，每个都是对自己缓存内的数据进行读写，这样就造成了结果不一致的现象。</p>
+<h1 id="volatile的作用"><a href="#volatile的作用" class="headerlink" title="volatile的作用"></a>volatile的作用</h1><p>volatile的作用就是当一个线程更新某个volatile声明的变量时，会通知其他的cpu使缓存失效，从而其他cpu想要做更新操作时，需要从内存重新读取数据。具体的通知方式，一种是通过某种协议，比如MESI；再就是对总线加锁，控制变量的读取。具体硬件上怎么个流程，我就搞不清楚了…</p>
+<h1 id="并发"><a href="#并发" class="headerlink" title="并发"></a>并发</h1><p>这里还需要强调的时，并发编程涉及的三个特性：原子性、可见性、有序性。就好像分布式里面的cap一样，需要熟知。先来通俗的描述下：</p>
+<h2 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h2><p>即要么全做，要么全部做。比如从a银行转钱到b银行。</p>
+<p>在编程中，除了long或者double外的变量更新就是原子操作。long和double除外，是因为它们在32位的操作系统上，会被分成两部分进行更新，此时就不是原子的。</p>
+<p>再比如最常见的i++也不是原子的，它相当于先<code>读取i</code>，<code>进行+1操作</code>，<code>更新</code>三个步骤进行。</p>
+<h2 id="可见性"><a href="#可见性" class="headerlink" title="可见性"></a>可见性</h2><p>多个线程访问同一个变量时，这个变量被修改后，能被其他的线程看到。</p>
+<h2 id="有序性"><a href="#有序性" class="headerlink" title="有序性"></a>有序性</h2><p>比如<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">int a = 10; </span><br><span class="line">int r = 2;   </span><br><span class="line">a = a + 3;  </span><br><span class="line">r = a*a;</span><br></pre></td></tr></table></figure></p>
+<p>这段代码有可能进行指令的重排，从而导致结果跟预期的不一致。指令的重排需要按照<code>happens-before</code>原则，比如:</p>
+<ol>
+<li>程序次序原则，一个线程内，按照书写的顺序执行</li>
+<li>锁定原则，lock前后执行</li>
+<li>volatile原则，volatile变量前后执行</li>
+<li>传递原则，如果a需要调用b，那么a就会在b的前面</li>
+</ol>
+<p>…</p>
+<p>等等…</p>
+<h2 id="volatile的特性"><a href="#volatile的特性" class="headerlink" title="volatile的特性"></a>volatile的特性</h2><p>volatile只能保证变量的可见性、有序性，但是不能保证原子性。因此可以用它来做double-check，但是不能来做i++的操作。如果想要实现i++的可靠性，必须依赖于synchronized、lock或者atomicXXX来实现。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
+<li>海子的《Java并发编程：volatile关键字解析》：<a href="http://www.cnblogs.com/dolphin0520/p/3920373.html" target="_blank" rel="noopener">http://www.cnblogs.com/dolphin0520/p/3920373.html</a></li>
+<li>liuxiaopeng的《Java 并发编程：volatile的使用及其原理》：<a href="https://www.cnblogs.com/paddix/p/5428507.html" target="_blank" rel="noopener">https://www.cnblogs.com/paddix/p/5428507.html</a></li>
+<li>double check <a href="http://blog.csdn.net/dl88250/article/details/5439024" target="_blank" rel="noopener">http://blog.csdn.net/dl88250/article/details/5439024</a></li>
+<li>cpu缓存知识：<a href="http://blog.jobbole.com/36263/" target="_blank" rel="noopener">http://blog.jobbole.com/36263/</a></li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">java</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/技术//" class="article-tag-list-link color3">技术</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2017/11/15/volatile的作用/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
   
 
 
@@ -354,6 +594,10 @@ MathJax.Hub.Queue(function() {
             <input type="checkbox" q-on="click:toggleTag(e)" q-attr="checked:showTags">
           </label>
           <ul class="article-tag-list" q-show="showTags">
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">java</a>
+              </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">闲扯</a>
