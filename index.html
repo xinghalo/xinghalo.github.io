@@ -264,35 +264,10 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="背景知识"><a href="#背景知识" class="headerlink" title="背景知识"></a>背景知识</h1><h2 id="哈希冲突"><a href="#哈希冲突" class="headerlink" title="哈希冲突"></a>哈希冲突</h2><p>哈希是指通过某种方法把数据转变成特定的数值，数值根据mod对应到不同的单元上。比如在Java中，字符串就是通过每个字符的编码来计算、数字是本身对应的值等等，不过就算是再好的哈希方法，也有可能出现两个不同的对象hash值相同的情况。如果在HashMap中，hashcode相同，它们就会被分配到对应的存储位置，此时就会出现冲突——也叫做哈希冲突。</p>
-<p>解决哈希冲突的方法有很多种：</p>
-<ol>
-<li>开放地址探测法：即如果出现哈希冲突，则按照一定的规则继续选择位置，如线性探测法再、二次探测再、伪随机探测等等。</li>
-<li>链地址法：如果出现冲突，则在冲突的位置后面形成链表进行存储。HashMap就是通过这种方式实现的</li>
-<li>再哈希法：这种方法是再换另一个哈希方法寻找存储的位置。</li>
-</ol>
-<h2 id="hashCode和equals"><a href="#hashCode和equals" class="headerlink" title="hashCode和equals"></a>hashCode和equals</h2><p>首先hashcode是经过一定的方法映射出的数值，而equals如果没有重写的话，是对比了每个内部的属性。总结的来说，如果两个对象hashcode相同，它们未必相等；如果hashcode不同，肯定不等。从另一个角度说，如果两个对象equals相等，它们肯定相等；如果equals不同，则它们不同。</p>
-<p>那么肯定会有人疑问，那还要hashcode干嘛咧？Hashcode其实就是在hashMap或者hashset进行快速比较的时候有用，可以快速的判断对像是否不同，如果hashcode相同，则再继续对比equals方法。这样可以节省大量的时间。</p>
-<h1 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h1><p>HashMap允许null的key和value，HashMap根HashTable很像，只不过非线程安全并且允许Null值。</p>
-<p>有两个参数会影响Map的性能，分别是初始容量<code>initial capacity</code>和负载参数<code>load facotr</code>(确定了什么时间增加hash table的容量)。当容量超过<code>load factor</code>*<code>initial capacity</code>时，就会进行扩容，然后执行rehash操作。</p>
-<p>默认load factor时0.75，它基本已经能提供一个不错的性能效果了。不过在使用的初期可以预估一下数据量，直接设置一个比较适合的初始值。</p>
-<p>注意：HashMap不是线程安全的，可以通过<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Map m = Collections.synchronizedMap(new HashMap(...))</span><br></pre></td></tr></table></figure></p>
-<p>实现线程安全的map.</p>
-<h1 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">transient Node&lt;K,V&gt;[] table;</span><br><span class="line">transient Set&lt;Map.Entry&lt;K,V&gt;&gt; entrySet;</span><br><span class="line">int threshold;</span><br><span class="line">final float loadFactor;</span><br></pre></td></tr></table></figure>
-<h1 id="新增"><a href="#新增" class="headerlink" title="新增"></a>新增</h1><p>如果key之前出现过，那么将会用新的value代替旧的value<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public V put(K key, V value) &#123;</span><br><span class="line">    return putVal(hash(key), key, value, false, true);</span><br><span class="line">&#125;</span><br><span class="line">static final int hash(Object key) &#123;</span><br><span class="line">    int h;</span><br><span class="line">    return (key == null) ? 0 : (h = key.hashCode()) ^ (h &gt;&gt;&gt; 16);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>主要的代码在这里：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">final V putVal(int hash, K key, V value, boolean onlyIfAbsent,boolean evict) &#123;</span><br><span class="line">    Node&lt;K,V&gt;[] tab; Node&lt;K,V&gt; p; int n, i;</span><br><span class="line">    if ((tab = table) == null || (n = tab.length) == 0)</span><br><span class="line">        n = (tab = resize()).length;</span><br><span class="line">    if ((p = tab[i = (n - 1) &amp; hash]) == null)</span><br><span class="line">        tab[i] = newNode(hash, key, value, null);</span><br><span class="line">    else &#123;</span><br><span class="line">        Node&lt;K,V&gt; e; K k;</span><br><span class="line">        if (p.hash == hash &amp;&amp;</span><br><span class="line">            ((k = p.key) == key || (key != null &amp;&amp; key.equals(k))))</span><br><span class="line">            e = p;</span><br><span class="line">        else if (p instanceof TreeNode)</span><br><span class="line">            e = ((TreeNode&lt;K,V&gt;)p).putTreeVal(this, tab, hash, key, value);</span><br><span class="line">        else &#123;</span><br><span class="line">            for (int binCount = 0; ; ++binCount) &#123;</span><br><span class="line">                if ((e = p.next) == null) &#123;</span><br><span class="line">                    p.next = newNode(hash, key, value, null);</span><br><span class="line">                    // 如果每个链表长度超过8，那么就转为红黑树</span><br><span class="line">                    if (binCount &gt;= TREEIFY_THRESHOLD - 1) // -1 for 1st</span><br><span class="line">                        treeifyBin(tab, hash);</span><br><span class="line">                    break;</span><br><span class="line">                &#125;</span><br><span class="line">                if (e.hash == hash &amp;&amp;</span><br><span class="line">                    ((k = e.key) == key || (key != null &amp;&amp; key.equals(k))))</span><br><span class="line">                    break;</span><br><span class="line">                p = e;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        if (e != null) &#123; // existing mapping for key</span><br><span class="line">            V oldValue = e.value;</span><br><span class="line">            if (!onlyIfAbsent || oldValue == null)</span><br><span class="line">                e.value = value;</span><br><span class="line">            afterNodeAccess(e);</span><br><span class="line">            return oldValue;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ++modCount;</span><br><span class="line">    if (++size &gt; threshold)</span><br><span class="line">        resize();</span><br><span class="line">    afterNodeInsertion(evict);</span><br><span class="line">    return null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>对于写操作的场景：</p>
-<ol>
-<li>先会经过hash计算hashcode然后与size进行&amp;操作，判断存储的位置</li>
-<li>如果存储的位置没有节点，则直接写入</li>
-<li>如果存储的位置有节点，且是树节点，则向树中插入节点</li>
-<li>如果存储的位置有节点，不是树节点（而是普通的链表），则进行头插。但是会判断当前链表的长度，如果超过设置的阈值（默认是8），就会把链表转化成树。</li>
-</ol>
-<p>更新的时候也是上面的操作流程，只不过在对比hashcode相同时，还会检查key是否equals</p>
-<p>读取和删除基本上也是上面的套路。</p>
-<h1 id="为什么非线程安全"><a href="#为什么非线程安全" class="headerlink" title="为什么非线程安全"></a>为什么非线程安全</h1><p>这个主要是因为在rehash的时候由于table[]后面接的是链表，而hashMap还是采用头插的形式。因此如果有不同的线程同时进行rehash，就可能导致链表形成环形，造成死循环。</p>
-<p>具体的可以参考网上的文章：<a href="https://coolshell.cn/articles/9606.html" target="_blank" rel="noopener">https://coolshell.cn/articles/9606.html</a></p>
-
+        <p>HashMap不仅仅是java里面很重要的知识点，也是日常开发使用最多的集合框架。了解它的特性，会对日常开发有很大的帮助。<br>
+        
+          <a class="article-more-a" href="/2018/11/02/HashMap源码分析/#more">more >></a>
+        
       
 
       
@@ -376,80 +351,10 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="抽象类与接口"><a href="#抽象类与接口" class="headerlink" title="抽象类与接口"></a>抽象类与接口</h1><p>抽象类通常是描述一些对象的通用方法和属性，并且默认实现一些功能，它不能被实例化。接口仅仅是描述一种方法的规约，即只能通过某几个方法来操作对象，它把内部的实现隐藏到实现类中，自己仅仅关注使用而已。</p>
-<table>
-<thead>
-<tr>
-<th>参数</th>
-<th>抽象类</th>
-<th>接口</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>默认的方法实现</td>
-<td>它可以有默认的方法实现</td>
-<td>接口完全是抽象的。它根本不存在方法的实现</td>
-</tr>
-<tr>
-<td>实现</td>
-<td>子类使用extends关键字来继承抽象类。如果子类不是抽象类的话，它需要提供抽象类中所有声明的方法的实现。</td>
-<td>子类使用关键字implements来实现接口。它需要提供接口中所有声明的方法的实现</td>
-</tr>
-<tr>
-<td>构造器</td>
-<td>抽象类可以有构造器</td>
-<td>接口不能有构造器</td>
-</tr>
-<tr>
-<td>与正常Java类的区别</td>
-<td>除了你不能实例化抽象类之外，它和普通Java类没有任何区别</td>
-<td>接口是完全不同的类型</td>
-</tr>
-<tr>
-<td>访问修饰符</td>
-<td>抽象方法可以有public、protected和default这些修饰符</td>
-<td>接口方法默认修饰符是public。你不可以使用其它修饰符</td>
-</tr>
-<tr>
-<td>main方法</td>
-<td>抽象方法可以有main方法并且我们可以运行它</td>
-<td>接口没有main方法，因此我们不能运行它。</td>
-</tr>
-<tr>
-<td>多继承</td>
-<td>抽象方法可以继承一个类和实现多个接口</td>
-<td>接口只可以继承一个或多个其它接口</td>
-</tr>
-<tr>
-<td>速度</td>
-<td>它比接口速度要快</td>
-<td>接口是稍微有点慢的，因为它需要时间去寻找在类中实现的方法。</td>
-</tr>
-<tr>
-<td>添加新方法</td>
-<td>如果你往抽象类中添加新的方法，你可以给它提供默认的实现。因此你不需要改变你现在的代码。</td>
-<td>如果你往接口中添加方法，那么你必须改变实现该接口的类。</td>
-</tr>
-</tbody>
-</table>
-<h1 id="枚举"><a href="#枚举" class="headerlink" title="枚举"></a>枚举</h1><p>平时代码中总是有一些特殊的变量，这些变量有一些类似的特点。比如程咬金的被动技能是舍生忘死，一技能是爆裂双斧；钟无艳的被动技能是石之炼金，一技能是狂飙突进。如果每次都用字符串的形式，代码就会显得很乱。这时候就可以使用enum，enum枚举不仅仅可以表示简单的形式，还可以封装复杂的类型。</p>
-<p>比如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">public enum KingHeros &#123;</span><br><span class="line">    ChengYaojin,</span><br><span class="line">    ZhongWuYan,</span><br><span class="line">    LiBai;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class KingHerosTest1 &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        System.out.println(KingHeros.ZhongWuYan);</span><br><span class="line">        System.out.println(KingHeros.valueOf(&quot;ZhongWuYan&quot;));</span><br><span class="line">        System.out.println(KingHeros.values());</span><br><span class="line">        System.out.println(KingHeros.ZhongWuYan.equals(KingHeros.valueOf(&quot;ZhongWuYan&quot;)));</span><br><span class="line">        caseTest(KingHeros.ZhongWuYan);</span><br><span class="line">    &#125;</span><br><span class="line">    /**</span><br><span class="line">     * switch的使用</span><br><span class="line">     * @param kingHeros</span><br><span class="line">     */</span><br><span class="line">    public static void caseTest(KingHeros kingHeros)&#123;</span><br><span class="line">        switch (kingHeros)&#123;</span><br><span class="line">            case ChengYaojin:</span><br><span class="line">                System.out.println(&quot;我是程咬金&quot;);</span><br><span class="line">                break;</span><br><span class="line">            case ZhongWuYan:</span><br><span class="line">                System.out.println(&quot;我是钟无艳&quot;);</span><br><span class="line">                break;</span><br><span class="line">            case LiBai:</span><br><span class="line">                System.out.println(&quot;我是李白&quot;);</span><br><span class="line">                break;</span><br><span class="line">            default:</span><br><span class="line">                System.out.println(&quot;我是NPC&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>输出内容：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ZhongWuYan</span><br><span class="line">ZhongWuYan</span><br><span class="line">[Lxingoo.test.KingHeros;@452b3a41</span><br><span class="line">true</span><br><span class="line">我是钟无艳</span><br></pre></td></tr></table></figure></p>
-<p>上面只是枚举最简单的用法，它还可以支持复杂的类型。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">public enum KingHeros &#123;</span><br><span class="line">    ChengYaojin(&quot;程咬金&quot;,&quot;舍生忘死&quot;,&quot;爆裂双斧&quot;),</span><br><span class="line">    ZhongWuYan(&quot;钟无艳&quot;,&quot;石之炼金&quot;,&quot;狂飙突进&quot;);</span><br><span class="line"></span><br><span class="line">    private String name;</span><br><span class="line">    private String beidong;</span><br><span class="line">    private String yijineng;</span><br><span class="line"></span><br><span class="line">    private KingHeros(String name, String beidong, String yijineng)&#123;</span><br><span class="line">        this.name = name;</span><br><span class="line">        this.beidong = beidong;</span><br><span class="line">        this.yijineng = yijineng;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public String getName() &#123;</span><br><span class="line">        return name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void setName(String name) &#123;</span><br><span class="line">        this.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public String getBeidong() &#123;</span><br><span class="line">        return beidong;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void setBeidong(String beidong) &#123;</span><br><span class="line">        this.beidong = beidong;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public String getYijineng() &#123;</span><br><span class="line">        return yijineng;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void setYijineng(String yijineng) &#123;</span><br><span class="line">        this.yijineng = yijineng;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void 自我介绍()&#123;</span><br><span class="line">        System.out.println(&quot;我叫&quot;+name+&quot;，我的被动是&quot;+beidong+&quot;，我的一技能是&quot;+yijineng);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">public class KingHerosTest1 &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        KingHeros.ChengYaojin.自我介绍();</span><br><span class="line">        KingHeros.ZhongWuYan.自我介绍();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>输出内容是<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">我叫程咬金，我的被动是舍生忘死，我的一技能是爆裂双斧</span><br><span class="line">我叫钟无艳，我的被动是石之炼金，我的一技能是狂飙突进</span><br></pre></td></tr></table></figure></p>
-<p>这种枚举的使用方法可以良好的组织代码，非常有用。</p>
-<p>参考 <a href="http://www.cnblogs.com/zhaoyanjun/p/5659811.html" target="_blank" rel="noopener">java枚举</a></p>
-<h1 id="泛型"><a href="#泛型" class="headerlink" title="泛型"></a>泛型</h1><p>泛型是类型参数化的一种使用方法，最常用在集合类中。如果阅读集合类的代码，可以看到大量的泛型。</p>
-<p>泛型只是在编译期起作用的一种机制，主要是为了限制集合类存储的类型。以免一个集合内既有字符串又有数字，结果在使用的时候会有很大的困扰。如果使用泛型会有一个叫做反醒擦除的概念，就是再编译期间，把泛型擦出掉，替换成对应的类型。比如<code>List&lt;?&gt;</code>替换成<code>List&lt;Object&gt;</code>；<code>List&lt;? extends Number&gt;</code> 替换成<code>List&lt;Number&gt;</code>。</p>
-<p>另外，泛型有几种定义方法：</p>
-<ol>
-<li>范型上限：Person&lt;? extends Number&gt; 接受继承Number的任何类</li>
-<li>范型下限：Person&lt;? super Number&gt; 接受Nunber以及其父类</li>
-<li>Person&lt;?&gt;可以接受任何类型，但是不能修改</li>
-</ol>
-<p>参考 <a href="http://blog.csdn.net/sunxianghuang/article/details/51982979" target="_blank" rel="noopener">Java泛型深入理解</a></p>
-
+        <p>抽象类通常是描述一些对象的通用方法和属性，并且默认实现一些功能，它不能被实例化。接口仅仅是描述一种方法的规约，即只能通过某几个方法来操作对象，它把内部的实现隐藏到实现类中，自己仅仅关注使用而已。<br>
+        
+          <a class="article-more-a" href="/2018/10/29/接口与抽象类/#more">more >></a>
+        
       
 
       
@@ -533,109 +438,10 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <blockquote>
-<p>Java开发有个很基础的问题，虽然我们平时接触的不多，但是了解它却成为Java开发的必备基础——这就是JVM。在C++中我们需要手动申请内存然后释放内存，否则就会出现对象已经不再使用内存却仍被占用的情况。在Java中JVM内置了垃圾回收的机制，帮助开发者承担对象的创建和释放的工作，极大的减轻了开发的负担。那是不是我们就不需要了解JVM了，显然在做一些优化或者深入研究应用性能的时候，JVM还是起了很关键的作用的。因此本篇就总结性的描述下JVM的内存模型与垃圾回收相关的知识。</p>
-</blockquote>
-<p>本文的主要内容如下：</p>
-<ul>
-<li>内存模型</li>
-<li>垃圾回收</li>
-<li>参考文章</li>
-</ul>
-<h1 id="内存模型"><a href="#内存模型" class="headerlink" title="内存模型"></a>内存模型</h1><p><img src="http://img.blog.csdn.net/20150720152805765?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQv/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt=""></p>
-<h2 id="各部分的功能"><a href="#各部分的功能" class="headerlink" title="各部分的功能"></a>各部分的功能</h2><p>这几个存储区最主要的就是栈区和堆区，那么什么是栈什么是堆呢？说的简单点，栈里面存放的是基本的数据类型和引用，而堆里面则是存放各种对象实例的。<br><img src="https://s5.51cto.com/wyfs02/M01/A4/06/wKioL1mlFPzT7_hLAAA-qYFsUa8977.png-wh_651x-s_286560225.png" alt=""></p>
-<p>堆与栈分开设计是为什么呢？ </p>
-<ul>
-<li>栈存储了处理逻辑、堆存储了具体的数据，这样隔离设计更为清晰</li>
-<li>堆与栈分离，使得堆可以被多个栈共享。</li>
-<li>栈保存了上下文的信息，因此只能向上增长；而堆是动态分配</li>
-</ul>
-<p>栈的大小可以通过-XSs设置，如果不足的话，会引起java.lang.StackOverflowError的异常</p>
-<h4 id="栈区"><a href="#栈区" class="headerlink" title="栈区"></a>栈区</h4><p>线程私有，生命周期与线程相同。每个方法执行的时候都会创建一个栈帧（stack frame）用于存放 局部变量表、操作栈、动态链接、方法出口。</p>
-<h4 id="堆"><a href="#堆" class="headerlink" title="堆"></a>堆</h4><p>存放对象实例，所有的对象的内存都在这里分配。垃圾回收主要就是作用于这里的。</p>
-<ul>
-<li>堆得内存由-Xms指定，默认是物理内存的1/64；最大的内存由-Xmx指定，默认是物理内存的1/4。</li>
-<li>默认空余的堆内存小于40%时，就会增大，直到-Xmx设置的内存。具体的比例可以由-XX:MinHeapFreeRatio指定</li>
-<li>空余的内存大于70%时，就会减少内存，直到-Xms设置的大小。具体由-XX:MaxHeapFreeRatio指定。</li>
-</ul>
-<p>因此一般都建议把这两个参数设置成一样大，可以避免JVM在不断调整大小。</p>
-<h4 id="程序计数器"><a href="#程序计数器" class="headerlink" title="程序计数器"></a>程序计数器</h4><p>这里记录了线程执行的字节码的行号，在分支、循环、跳转、异常、线程恢复等都依赖这个计数器。</p>
-<h4 id="方法区"><a href="#方法区" class="headerlink" title="方法区"></a>方法区</h4><p>类型信息、字段信息、方法信息、其他信息</p>
-<p>总结</p>
-<table>
-<thead>
-<tr>
-<th>名称</th>
-<th>特征</th>
-<th>作用</th>
-<th>配置</th>
-<th>异常</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>栈区</td>
-<td>线程私有，使用一段连续的内存空间</td>
-<td>存放局部变量表、操作栈、动态链接、方法出口</td>
-<td>-XSs</td>
-<td>StackOverflowError OutOfMemoryError</td>
-</tr>
-<tr>
-<td>堆</td>
-<td>线程共享，生命周期与虚拟机相同</td>
-<td>保存对象实例</td>
-<td>-Xms -Xmx -Xmn</td>
-<td>OutOfMemoryError</td>
-</tr>
-<tr>
-<td>程序计数器</td>
-<td>线程私有、占用内存小</td>
-<td>字节码行号</td>
-<td>无</td>
-<td>无</td>
-</tr>
-<tr>
-<td>方法区</td>
-<td>线程共享</td>
-<td>存储类加载信息、常量、静态变量等</td>
-<td>-XX:PermSize -XX:MaxPermSize</td>
-<td>OutOfMemoryError</td>
-</tr>
-</tbody>
-</table>
-<h1 id="垃圾回收"><a href="#垃圾回收" class="headerlink" title="垃圾回收"></a>垃圾回收</h1><h2 id="如何定义垃圾"><a href="#如何定义垃圾" class="headerlink" title="如何定义垃圾"></a>如何定义垃圾</h2><p>有两种方式，一种是引用计数（但是无法解决循环引用的问题）；另一种就是可达性分析。</p>
-<p>判断对象可以回收的情况：</p>
-<ul>
-<li>显示的把某个引用置位NULL或者指向别的对象</li>
-<li>局部引用指向的对象</li>
-<li>弱引用关联的对象</li>
-</ul>
-<h2 id="垃圾回收的方法"><a href="#垃圾回收的方法" class="headerlink" title="垃圾回收的方法"></a>垃圾回收的方法</h2><h4 id="Mark-Sweep标记-清除算法"><a href="#Mark-Sweep标记-清除算法" class="headerlink" title="Mark-Sweep标记-清除算法"></a>Mark-Sweep标记-清除算法</h4><p><img src="http://images2015.cnblogs.com/blog/341412/201703/341412-20170310115901922-1449104767.png" alt=""></p>
-<p>这种方法优点就是减少停顿时间，但是缺点是会造成内存碎片。</p>
-<h4 id="Copying复制算法"><a href="#Copying复制算法" class="headerlink" title="Copying复制算法"></a>Copying复制算法</h4><p><img src="http://images2015.cnblogs.com/blog/341412/201703/341412-20170310120953625-1648207853.png" alt=""></p>
-<p>这种方法不涉及到对象的删除，只是把可用的对象从一个地方拷贝到另一个地方，因此适合大量对象回收的场景，比如新生代的回收。</p>
-<h4 id="Mark-Compact标记-整理算法"><a href="#Mark-Compact标记-整理算法" class="headerlink" title="Mark-Compact标记-整理算法"></a>Mark-Compact标记-整理算法</h4><p><img src="http://images2015.cnblogs.com/blog/341412/201703/341412-20170310120436734-894591806.png" alt=""></p>
-<p>这种方法可以解决内存碎片问题，但是会增加停顿时间。</p>
-<h4 id="Generational-Collection-分代收集"><a href="#Generational-Collection-分代收集" class="headerlink" title="Generational Collection 分代收集"></a>Generational Collection 分代收集</h4><p>最后的这种方法是前面几种的合体，即目前JVM主要采取的一种方法，思想就是把JVM分成不同的区域。每种区域使用不同的垃圾回收方法。</p>
-<p><img src="http://images2015.cnblogs.com/blog/341412/201703/341412-20170310111906594-1376910719.png" alt=""></p>
-<p>上面可以看到堆分成三个区域：</p>
-<ul>
-<li>新生代(Young Generation)：用于存放新创建的对象，采用复制回收方法，如果在s0和s1之间复制一定次数后，转移到年老代中。这里的垃圾回收叫做minor GC; </li>
-<li>年老代(Old Generation)：这些对象垃圾回收的频率较低，采用的标记整理方法，这里的垃圾回收叫做 major GC。</li>
-<li>永久代(Permanent Generation)：存放Java本身的一些数据，当类不再使用时，也会被回收。</li>
-</ul>
-<h2 id="垃圾回收器"><a href="#垃圾回收器" class="headerlink" title="垃圾回收器"></a>垃圾回收器</h2><p><img src="http://images2015.cnblogs.com/blog/467583/201706/467583-20170628093656618-2097152177.png" alt=""></p>
-<h4 id="串行收集器-Serial"><a href="#串行收集器-Serial" class="headerlink" title="串行收集器 Serial"></a>串行收集器 Serial</h4><p>这种收集器就是以单线程的方式收集，垃圾回收的时候其他线程也不能工作。<br><img src="http://images2015.cnblogs.com/blog/467583/201706/467583-20170628093636461-1904264753.png" alt=""></p>
-<h4 id="并行收集器-Parallel"><a href="#并行收集器-Parallel" class="headerlink" title="并行收集器 Parallel"></a>并行收集器 Parallel</h4><p>以多线程的方式进行收集<br><img src="http://images2015.cnblogs.com/blog/467583/201706/467583-20170628093724414-184415121.png" alt=""></p>
-<h4 id="并发标记清除收集器-Concurrent-Mark-Sweep-Collector-CMS"><a href="#并发标记清除收集器-Concurrent-Mark-Sweep-Collector-CMS" class="headerlink" title="并发标记清除收集器 Concurrent Mark Sweep Collector, CMS"></a>并发标记清除收集器 Concurrent Mark Sweep Collector, CMS</h4><p>大致的流程为：初始标记–并发标记–重新标记–并发清除</p>
-<p><img src="http://images2015.cnblogs.com/blog/467583/201706/467583-20170628093846008-2001476745.png" alt=""></p>
-<h4 id="G1收集器-Garbage-First-Collector"><a href="#G1收集器-Garbage-First-Collector" class="headerlink" title="G1收集器 Garbage First Collector"></a>G1收集器 Garbage First Collector</h4><p>大致的流程为：初始标记–并发标记–最终标记–筛选回收</p>
-<p><img src="http://images2015.cnblogs.com/blog/467583/201706/467583-20170628093914149-1103645311.png" alt=""></p>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="http://developer.51cto.com/art/200911/165015.htm" target="_blank" rel="noopener">http://developer.51cto.com/art/200911/165015.htm</a></p>
-<p><a href="http://www.importnew.com/19085.html" target="_blank" rel="noopener">http://www.importnew.com/19085.html</a></p>
-<p><a href="http://www.cnblogs.com/chengxuyuanzhilu/p/7088316.html" target="_blank" rel="noopener">http://www.cnblogs.com/chengxuyuanzhilu/p/7088316.html</a></p>
-<p>内存模型 <a href="http://blog.csdn.net/u012152619/article/details/46968883" target="_blank" rel="noopener">http://blog.csdn.net/u012152619/article/details/46968883</a></p>
-
+        <p>Java开发有个很基础的问题，虽然我们平时接触的不多，但是了解它却成为Java开发的必备基础——这就是JVM。在C++中我们需要手动申请内存然后释放内存，否则就会出现对象已经不再使用内存却仍被占用的情况。在Java中JVM内置了垃圾回收的机制，帮助开发者承担对象的创建和释放的工作，极大的减轻了开发的负担。那是不是我们就不需要了解JVM了，显然在做一些优化或者深入研究应用性能的时候，JVM还是起了很关键的作用的。因此本篇就总结性的描述下JVM的内存模型与垃圾回收相关的知识。<br>
+        
+          <a class="article-more-a" href="/2018/10/24/JVM内存模型与垃圾回收/#more">more >></a>
+        
       
 
       
@@ -699,91 +505,6 @@
 
 
   
-    <article id="post-第一篇" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/27/第一篇/">第一篇</a>
-    </h1>
-  
-
-        
-        <a href="/2018/04/27/第一篇/" class="archive-article-date">
-  	<time datetime="2018-04-27T01:25:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-27</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>hello</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">闲扯</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/生活//" class="article-tag-list-link color3">生活</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/04/27/第一篇/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
     <article id="post-Thread中的sleep-wait-notify-notifyall" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -804,47 +525,10 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <blockquote>
-<p>线程是计算程序运行的最小载体，由于单个单核CPU的硬件水平发展到了一定的瓶颈期，因此就出现了多核多CPU的情况，直接就导致程序员多线程编程的复杂。由此可见线程对于高性能开发的重要性。</p>
-</blockquote>
-<p>那么线程在计算机中有好几种状态，他们之间是怎么切换的？sleep和wait又有什么区别？notify和notifyAll怎么用？带着这些问题，我们来看看Java的线程吧！</p>
-<h1 id="Thread的状态"><a href="#Thread的状态" class="headerlink" title="Thread的状态"></a>Thread的状态</h1><p>先来看看Thread类里面都有哪几种状态，在Thread.class中可以找到这个枚举，它定义了线程的相关状态:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public enum State &#123;</span><br><span class="line">    NEW,</span><br><span class="line">    RUNNABLE,</span><br><span class="line">    BLOCKED,</span><br><span class="line">    WAITING,</span><br><span class="line">    TIMED_WAITING,</span><br><span class="line">    TERMINATED;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>如下图所示：<br><img src="https://pic2.zhimg.com/bb4f380c79779c9dc1aea6f0a6c10b6d_r.jpg" alt=""></p>
-<ol>
-<li>NEW 新建状态，线程创建且没有执行start方法时的状态</li>
-<li>RUNNABLE 可运行状态，线程已经启动，但是等待相应的资源（比如IO或者时间片切换）才能开始执行</li>
-<li>BLOCKED 阻塞状态，当遇到synchronized或者lock且没有取得相应的锁，就会进入这个状态</li>
-<li>WAITING 等待状态，当调用<code>Object.wait</code>或者<code>Thread.join()</code>且没有设置时间，在或者<code>LockSupport.park</code>时，都会进入等待状态。</li>
-<li>TIMED_WAITING 计时等待，当调用<code>Thread.sleep()</code>或者<code>Object.wait(xx)</code>或者<code>Thread.join(xx)</code>或者<code>LockSupport.parkNanos</code>或者<code>LockSupport.partUntil</code>时，进入该状态</li>
-<li>TERMINATED 终止状态，线程中断或者运行结束的状态</li>
-</ol>
-<h1 id="先来sleep和wait的区别"><a href="#先来sleep和wait的区别" class="headerlink" title="先来sleep和wait的区别"></a>先来sleep和wait的区别</h1><p>由于wait方法是在Object上的，而sleep方法是在Thread上，当调用Thread.sleep时，并不能改变对象的状态，因此也不会释放锁。</p>
-<p>这让我想起来我家的两个主子，一只泰迪一只美短，虽然他们两个是不同的物种，但是却有着相同的爱好，就是爱吃牛肉。偶尔给它们两个开荤，奈何只有一个食盆，每次只能一个主子吃肉。这就好比是两个线程，在争用同一个变量。如果使用thread.sleep，那么他们吃完后，不会释放锁等资源；如果使用wait，就会释放。</p>
-<p>详细的看一下下面的代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">package cn.xingoo.test.basic.thread;</span><br><span class="line"></span><br><span class="line">public class AnimalEat &#123;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        System.out.println(&quot;盆里有20块肉&quot;);</span><br><span class="line">        Animal animal = new Animal();</span><br><span class="line">        try&#123;</span><br><span class="line">            Thread tidy = new Thread(animal,&quot;泰迪&quot;);</span><br><span class="line">            Thread cat  = new Thread(animal,&quot;美短&quot;);</span><br><span class="line">            tidy.start();</span><br><span class="line">            cat.start();</span><br><span class="line">        &#125;catch (Exception e)&#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(&quot;盆里的肉吃完了！&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">class Animal implements Runnable &#123;</span><br><span class="line">    int count = 0;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        while(count &lt; 20)&#123;</span><br><span class="line">            synchronized (this)&#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName()+&quot;吃力第&quot;+count+&quot;块肉&quot;);</span><br><span class="line">                    count++;</span><br><span class="line">                    //Thread.sleep(100);</span><br><span class="line">                    this.wait(100);</span><br><span class="line">                &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>当使用this.wait(100)的时候，会输出下面的信息：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">盆里有20块肉</span><br><span class="line">泰迪吃力第0块肉</span><br><span class="line">美短吃力第1块肉</span><br><span class="line">盆里的肉吃完了！</span><br><span class="line">泰迪吃力第2块肉</span><br><span class="line">美短吃力第3块肉</span><br><span class="line">泰迪吃力第4块肉</span><br><span class="line">美短吃力第5块肉</span><br><span class="line">泰迪吃力第6块肉</span><br><span class="line">美短吃力第7块肉</span><br><span class="line">泰迪吃力第8块肉</span><br><span class="line">美短吃力第9块肉</span><br><span class="line">泰迪吃力第10块肉</span><br><span class="line">美短吃力第11块肉</span><br><span class="line">美短吃力第12块肉</span><br><span class="line">泰迪吃力第13块肉</span><br><span class="line">美短吃力第14块肉</span><br><span class="line">泰迪吃力第15块肉</span><br><span class="line">美短吃力第16块肉</span><br><span class="line">泰迪吃力第17块肉</span><br><span class="line">美短吃力第18块肉</span><br><span class="line">泰迪吃力第19块肉</span><br></pre></td></tr></table></figure></p>
-<p>可以发现，输出的信息并不是完美的交替，这是因为调用wait之后，并不一定马上时另一个线程执行，而是要根据CPU的时间分片轮转等其他的条件来定，轮到谁就看运气了。</p>
-<p>当使用Thread.sleep(100)的时候，可以得到下面的信息:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">盆里有20块肉</span><br><span class="line">泰迪吃力第0块肉</span><br><span class="line">盆里的肉吃完了！</span><br><span class="line">泰迪吃力第1块肉</span><br><span class="line">泰迪吃力第2块肉</span><br><span class="line">泰迪吃力第3块肉</span><br><span class="line">泰迪吃力第4块肉</span><br><span class="line">泰迪吃力第5块肉</span><br><span class="line">泰迪吃力第6块肉</span><br><span class="line">泰迪吃力第7块肉</span><br><span class="line">泰迪吃力第8块肉</span><br><span class="line">泰迪吃力第9块肉</span><br><span class="line">泰迪吃力第10块肉</span><br><span class="line">泰迪吃力第11块肉</span><br><span class="line">泰迪吃力第12块肉</span><br><span class="line">泰迪吃力第13块肉</span><br><span class="line">泰迪吃力第14块肉</span><br><span class="line">泰迪吃力第15块肉</span><br><span class="line">泰迪吃力第16块肉</span><br><span class="line">泰迪吃力第17块肉</span><br><span class="line">泰迪吃力第18块肉</span><br><span class="line">美短吃力第19块肉</span><br><span class="line">泰迪吃力第20块肉</span><br></pre></td></tr></table></figure></p>
-<p>注意看最后面有一只美短。这是因为synchronized的代码同步时在while循环里面，因此最后一次两个主子都进入到了while里面，然后才开始等待相应的锁。这就导致第19次轮到了另一个主子。</p>
-<p>总结来说，sleep不会释放线程的锁,wait会释放线程的资源。</p>
-<h1 id="再谈谈wait与notify和notifyall"><a href="#再谈谈wait与notify和notifyall" class="headerlink" title="再谈谈wait与notify和notifyall"></a>再谈谈wait与notify和notifyall</h1><p>wait、notify、notifyall这几个一般都一起使用。不过需要注意下面几个重要的点：</p>
-<ol>
-<li>调用wait\notify\notifyall方法时，需要与锁或者synchronized搭配使用，不然会报错<code>java.lang.IllegalMonitorStateException</code>，因为任何时刻，对象的控制权只能一个线程持有，因此调用wait等方法的时候，必须确保对其的控制权。</li>
-<li>如果对简单的对象调用wait等方法，如果对他们进行赋值也会报错，因为赋值相当于修改的原有的对象，因此如果有修改需求可以外面包装一层。</li>
-<li>notify可以唤醒一个在该对象上等待的线程，notifyAll可以唤醒所有等待的线程。</li>
-<li>wait(xxx) 可以挂起线程，并释放对象的资源，等计时结束后自动恢复；wait()则必须要其他线程调用notify或者notifyAll才能唤醒。</li>
-</ol>
-<p>举个通俗点的例子，我记得在高中的时候，每天上午快放学的时候大家都很紧张——因为那个时候小饭馆正好播放一些港台剧，大家就总愿意抢电视机旁边的位置，所以每次快要中午放学的时候，大家都做好冲刺跑步的准备。</p>
-<p>但是有的老师总愿意压堂，搞的大家怨声载道。</p>
-<p>比如，下面这位老师有的时候会用notifyall通知大家集体放学；有的时候会检查背书，背好了，才能走。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line">package cn.xingoo.test.basic.thread;</span><br><span class="line"></span><br><span class="line">public class School &#123;</span><br><span class="line">    private DingLing dingLing = new DingLing(false);</span><br><span class="line"></span><br><span class="line">    class Teacher extends Thread&#123;</span><br><span class="line">        Teacher(String name)&#123;</span><br><span class="line">            super(name);</span><br><span class="line">        &#125;</span><br><span class="line">        @Override</span><br><span class="line">        public void run() &#123;</span><br><span class="line">            //synchronized (dingLing)&#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    dingLing.wait(3000);</span><br><span class="line">                &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">                dingLing.flag = true;</span><br><span class="line"></span><br><span class="line">                System.out.println(&quot;放学啦&quot;);</span><br><span class="line">                dingLing.notifyAll();</span><br><span class="line"></span><br><span class="line">                /*for (int i = 0; i &lt; 3; i++) &#123;</span><br><span class="line">                    System.out.println(&quot;放一个走吧&quot;);</span><br><span class="line">                    dingLing.notify();</span><br><span class="line">                    try &#123;</span><br><span class="line">                        dingLing.wait(1000);</span><br><span class="line">                    &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;*/</span><br><span class="line">           // &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    class Student extends Thread&#123;</span><br><span class="line">        Student(String name)&#123;</span><br><span class="line">            super(name);</span><br><span class="line">        &#125;</span><br><span class="line">        @Override</span><br><span class="line">        public void run()&#123;</span><br><span class="line">            synchronized (dingLing)&#123;</span><br><span class="line">                while(!dingLing.flag)&#123;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName()+&quot;开始等待&quot;);</span><br><span class="line">                    try &#123;</span><br><span class="line">                        dingLing.wait();</span><br><span class="line">                    &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                System.out.println(Thread.currentThread().getName()+&quot;去吃饭啦&quot;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        School school = new School();</span><br><span class="line">        Teacher teacher  = school.new Teacher(&quot;老师&quot;);</span><br><span class="line">        Student zhangsan = school.new Student(&quot;张三&quot;);</span><br><span class="line">        Student lisi     = school.new Student(&quot;李四&quot;);</span><br><span class="line">        Student wangwu   = school.new Student(&quot;王五&quot;);</span><br><span class="line">        teacher.start();</span><br><span class="line">        zhangsan.start();</span><br><span class="line">        lisi.start();</span><br><span class="line">        wangwu.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class DingLing&#123;</span><br><span class="line">    Boolean flag = false;</span><br><span class="line">    public DingLing(Boolean flag)&#123;</span><br><span class="line">        this.flag = flag;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>当老师统一喊放学的时候，即调用<code>dingLing.notifyAll();</code>，会得到下面的输出:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">张三开始等待</span><br><span class="line">李四开始等待</span><br><span class="line">王五开始等待</span><br><span class="line">放学啦</span><br><span class="line">王五去吃饭啦</span><br><span class="line">李四去吃饭啦</span><br><span class="line">张三去吃饭啦</span><br></pre></td></tr></table></figure></p>
-<p>如果检查背书，那么每次老师只会调用一次notify，让一个同学（线程）走（工作）,就会得到下面的输出:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">张三开始等待</span><br><span class="line">李四开始等待</span><br><span class="line">王五开始等待</span><br><span class="line">放一个走吧</span><br><span class="line">张三去吃饭啦</span><br><span class="line">放一个走吧</span><br><span class="line">李四去吃饭啦</span><br><span class="line">放一个走吧</span><br><span class="line">王五去吃饭啦</span><br></pre></td></tr></table></figure></p>
-<p>注意的是，调用wait可以释放dingling的占用，这样才能让别的线程进行检查，如果改成Thread.sleep，有兴趣的童鞋就可以自己去看看效果啦！</p>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
-<li>最简单的实例说明wait、notify、notifyAll的使用方法：<a href="http://longdick.iteye.com/blog/453615" target="_blank" rel="noopener">http://longdick.iteye.com/blog/453615</a></li>
-<li>Java sleep和wait的区别：<a href="http://www.jb51.net/article/113587.htm" target="_blank" rel="noopener">http://www.jb51.net/article/113587.htm</a></li>
-<li>sleep和wait解惑:<a href="https://www.zhihu.com/question/23328075" target="_blank" rel="noopener">https://www.zhihu.com/question/23328075</a></li>
-</ol>
-
+        <p>线程是计算程序运行的最小载体，由于单个单核CPU的硬件水平发展到了一定的瓶颈期，因此就出现了多核多CPU的情况，直接就导致程序员多线程编程的复杂。由此可见线程对于高性能开发的重要性。<br>
+        
+          <a class="article-more-a" href="/2017/11/16/Thread中的sleep-wait-notify-notifyall/#more">more >></a>
+        
       
 
       
@@ -928,39 +612,10 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <blockquote>
-<p>众所周知，volatile关键字可以让线程的修改立刻通知其他的线程，从而达到数据一致的作用。那么它具体涉及到哪些内容呢？</p>
-</blockquote>
-<h1 id="关于缓存"><a href="#关于缓存" class="headerlink" title="关于缓存"></a>关于缓存</h1><p>计算机最大的存储空间就是磁盘（硬盘），但是访问的速度也是最慢的，价格最便宜；再就是内存，容量更小，造价更高，但是速度也更快。不过跟cpu的计算速度比起来，那就太慢了。可以想像，如果cpu每次计算都要从内存读取数据，那大部分的时间估计都浪费在这上面了。所以就引入了缓存的概：</p>
-<p><img src="http://jbcdn2.b0.upaiyun.com/2013/03/214.png" alt=""></p>
-<p>缓存的结构大概时这样的，从1级到3级速度越来越慢，最后通过总线与内存连接。如果时多核多cpu，那么结构大概是这样的：</p>
-<p><img src="http://jbcdn2.b0.upaiyun.com/2013/03/38.png" alt=""></p>
-<h1 id="多线程造成的缓存不一致"><a href="#多线程造成的缓存不一致" class="headerlink" title="多线程造成的缓存不一致"></a>多线程造成的缓存不一致</h1><p>由于现在大部分的机器都有多个cpu，这就导致如果时运行多线程的任务，就可能运行在不同的cpu上。试想一下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">int a = 0;</span><br><span class="line">int b = a;</span><br><span class="line">b += 1;</span><br></pre></td></tr></table></figure></p>
-<p>如果开启两个线程执行，我们想要的结果是3，但是最后的结果只是2。这是因为在做加法运算的时候，cpu会先把a的值读入cpu的缓存，然后更新缓存，在更新内存。很有可能两个线程分散在两个cpu，每个都是对自己缓存内的数据进行读写，这样就造成了结果不一致的现象。</p>
-<h1 id="volatile的作用"><a href="#volatile的作用" class="headerlink" title="volatile的作用"></a>volatile的作用</h1><p>volatile的作用就是当一个线程更新某个volatile声明的变量时，会通知其他的cpu使缓存失效，从而其他cpu想要做更新操作时，需要从内存重新读取数据。具体的通知方式，一种是通过某种协议，比如MESI；再就是对总线加锁，控制变量的读取。具体硬件上怎么个流程，我就搞不清楚了…</p>
-<h1 id="并发"><a href="#并发" class="headerlink" title="并发"></a>并发</h1><p>这里还需要强调的时，并发编程涉及的三个特性：原子性、可见性、有序性。就好像分布式里面的cap一样，需要熟知。先来通俗的描述下：</p>
-<h2 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h2><p>即要么全做，要么全部做。比如从a银行转钱到b银行。</p>
-<p>在编程中，除了long或者double外的变量更新就是原子操作。long和double除外，是因为它们在32位的操作系统上，会被分成两部分进行更新，此时就不是原子的。</p>
-<p>再比如最常见的i++也不是原子的，它相当于先<code>读取i</code>，<code>进行+1操作</code>，<code>更新</code>三个步骤进行。</p>
-<h2 id="可见性"><a href="#可见性" class="headerlink" title="可见性"></a>可见性</h2><p>多个线程访问同一个变量时，这个变量被修改后，能被其他的线程看到。</p>
-<h2 id="有序性"><a href="#有序性" class="headerlink" title="有序性"></a>有序性</h2><p>比如<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">int a = 10; </span><br><span class="line">int r = 2;   </span><br><span class="line">a = a + 3;  </span><br><span class="line">r = a*a;</span><br></pre></td></tr></table></figure></p>
-<p>这段代码有可能进行指令的重排，从而导致结果跟预期的不一致。指令的重排需要按照<code>happens-before</code>原则，比如:</p>
-<ol>
-<li>程序次序原则，一个线程内，按照书写的顺序执行</li>
-<li>锁定原则，lock前后执行</li>
-<li>volatile原则，volatile变量前后执行</li>
-<li>传递原则，如果a需要调用b，那么a就会在b的前面</li>
-</ol>
-<p>…</p>
-<p>等等…</p>
-<h2 id="volatile的特性"><a href="#volatile的特性" class="headerlink" title="volatile的特性"></a>volatile的特性</h2><p>volatile只能保证变量的可见性、有序性，但是不能保证原子性。因此可以用它来做double-check，但是不能来做i++的操作。如果想要实现i++的可靠性，必须依赖于synchronized、lock或者atomicXXX来实现。</p>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
-<li>海子的《Java并发编程：volatile关键字解析》：<a href="http://www.cnblogs.com/dolphin0520/p/3920373.html" target="_blank" rel="noopener">http://www.cnblogs.com/dolphin0520/p/3920373.html</a></li>
-<li>liuxiaopeng的《Java 并发编程：volatile的使用及其原理》：<a href="https://www.cnblogs.com/paddix/p/5428507.html" target="_blank" rel="noopener">https://www.cnblogs.com/paddix/p/5428507.html</a></li>
-<li>double check <a href="http://blog.csdn.net/dl88250/article/details/5439024" target="_blank" rel="noopener">http://blog.csdn.net/dl88250/article/details/5439024</a></li>
-<li>cpu缓存知识：<a href="http://blog.jobbole.com/36263/" target="_blank" rel="noopener">http://blog.jobbole.com/36263/</a></li>
-</ol>
-
+        <p>众所周知，volatile关键字可以让线程的修改立刻通知其他的线程，从而达到数据一致的作用。那么它具体涉及到哪些内容呢？<br>
+        
+          <a class="article-more-a" href="/2017/11/15/volatile的作用/#more">more >></a>
+        
       
 
       
@@ -1044,20 +699,10 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <blockquote>
-<p>最早接触到ThreadLocal是在阅读dianping的Cat-client，当时对它不是很理解，就搜索了一下，大概了解是一种解决线程安全问题的机制。现在再次阅读《实战java高并发程序设计》时，又重新对它有了更深一步的了解。</p>
-</blockquote>
-<p>并发程序很重要的主题就是解决多线程安全的问题，最常见的处理办法就是引入锁的机制；但是锁使得各个线程对临界区的使用效率变差，于是有了一种新的思路，即每个线程独立管理某个变量，变量的修改在线程中时独立的。就好比，以前锁的机制是100个人签到，只有一个签字薄；而现在ThreadLocal是每个人一张纸。</p>
-<p>不过上面的场景，只是threadLocal的一个应用场景。还有个例子，是在城市里面倒车。小明去上班要先做公交车在做地铁，如果每次坐车都买票，那么时间效率很差。于是小明办理了一张通用的公交卡，公交车和地铁都可以刷。而小蓝小红也有这样的公交卡，它们的公交卡彼此之间是独立的。这就是ThreadLocal的作用！</p>
-<p>总结来说，threadLocal有两点作用：</p>
-<ol>
-<li>多个线程之间独立</li>
-<li>单个线程对某个变量随时随地使用</li>
-</ol>
-<p>那么它的原理时什么样的呢？</p>
-<p>说白了，就是每个线程自己有一个Map，这个Map采用了线性探测法来存储变量。接下来主要阅读下代码吧:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">public T get() &#123;</span><br><span class="line">    Thread t = Thread.currentThread();</span><br><span class="line">    // 获取当前线程的localmap</span><br><span class="line">    ThreadLocalMap map = getMap(t);</span><br><span class="line">    if (map != null) &#123;</span><br><span class="line">        // 用当前的变量作为key查询对象</span><br><span class="line">        ThreadLocalMap.Entry e = map.getEntry(this);</span><br><span class="line">        if (e != null) &#123;</span><br><span class="line">            @SuppressWarnings(&quot;unchecked&quot;)</span><br><span class="line">            T result = (T)e.value;</span><br><span class="line">            return result;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    // 如果不存在的话，初始化变量</span><br><span class="line">    return setInitialValue();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public void set(T value) &#123;</span><br><span class="line">    Thread t = Thread.currentThread();</span><br><span class="line">    ThreadLocalMap map = getMap(t);</span><br><span class="line">    if (map != null)</span><br><span class="line">        map.set(this, value);</span><br><span class="line">    else</span><br><span class="line">        createMap(t, value);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>主要时那个getEntry方法:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">private Entry getEntry(ThreadLocal&lt;?&gt; key) &#123;</span><br><span class="line">    // 通过当前key的hashcode与列表的长度做 &amp;操作，判断存储的位置</span><br><span class="line">    int i = key.threadLocalHashCode &amp; (table.length - 1);</span><br><span class="line">    Entry e = table[i];</span><br><span class="line">    if (e != null &amp;&amp; e.get() == key)</span><br><span class="line">        return e;</span><br><span class="line">    else</span><br><span class="line">        // 如果不存在的话，进入getEntryAfterMiss方法</span><br><span class="line">        // 这种情况，可能是key被回收掉了；也可能是hash冲突了</span><br><span class="line">        return getEntryAfterMiss(key, i, e);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private Entry getEntryAfterMiss(ThreadLocal&lt;?&gt; key, int i, Entry e) &#123;</span><br><span class="line">    Entry[] tab = table;</span><br><span class="line">    int len = tab.length;</span><br><span class="line"></span><br><span class="line">    // 这里是典型的线性地址探测法，如果当前有值，👎</span><br><span class="line">    while (e != null) &#123;</span><br><span class="line">        ThreadLocal&lt;?&gt; k = e.get();</span><br><span class="line">        if (k == key)</span><br><span class="line">            return e;</span><br><span class="line">        if (k == null)</span><br><span class="line">            expungeStaleEntry(i);</span><br><span class="line">        else</span><br><span class="line">            i = nextIndex(i, len);</span><br><span class="line">        e = tab[i];</span><br><span class="line">    &#125;</span><br><span class="line">    return null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-
+        <p>最早接触到ThreadLocal是在阅读dianping的Cat-client，当时对它不是很理解，就搜索了一下，大概了解是一种解决线程安全问题的机制。现在再次阅读《实战java高并发程序设计》时，又重新对它有了更深一步的了解。<br>
+        
+          <a class="article-more-a" href="/2017/11/13/ThreadLocal从源码到应用/#more">more >></a>
+        
       
 
       
@@ -1141,111 +786,10 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="equals"><a href="#equals" class="headerlink" title="equals"></a>equals</h1><p><code>equals</code>是java很基础的一个问题，通常都会跟<code>==</code>来做比较。那么看看下面的问题：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">int a = 1;</span><br><span class="line">int b = 1;</span><br><span class="line">System.out.println(a==b);//true</span><br><span class="line">Integer a1 = new Integer(1);</span><br><span class="line">Integer a2 = new Integer(1);</span><br><span class="line">System.out.println(a1==a2);//false</span><br><span class="line">System.out.println(a1.equals(a2));//true</span><br></pre></td></tr></table></figure></p>
-<p>这是因为，<code>==</code>比较的是引用，而equals比较的内容，进入到Integer的源码中，就可以看到它其实重写了equals方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">public boolean equals(Object obj) &#123;</span><br><span class="line">    if (obj instanceof Integer) &#123;</span><br><span class="line">        return value == ((Integer)obj).intValue();</span><br><span class="line">    &#125;</span><br><span class="line">    return false;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>说到equals，就不得不说如果我们想要自己重写equasl都需要注意哪些地方。首先就是equals方法的设计需要满足下面几个特性：</p>
-<ol>
-<li>自反性：对于所有的非null，a=a</li>
-<li>对称性：a=b,则b=a</li>
-<li>传递性：a=b,b=c,则a=c</li>
-<li>一致性：对于没有被修改的ab，如果a=b，则一直a=b</li>
-<li>非空性：对于任何非Null,a!=null</li>
-</ol>
-<p>因此推荐最佳的equals设计方法应该是<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">@Override </span><br><span class="line">public boolean equals(Object o)&#123;</span><br><span class="line">    if(o == this)</span><br><span class="line">        return true;</span><br><span class="line">    if(!(o instanceof XX))</span><br><span class="line">        return false;</span><br><span class="line">    XX xx = (XX)o;</span><br><span class="line">    return xx.x.equals(o.x);//TODO</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>另外，还需要注意的是，如果覆盖了equals方法，那么还需要注意它的hashCode.</p>
-<h1 id="hashCode"><a href="#hashCode" class="headerlink" title="hashCode"></a>hashCode</h1><p>这个hashCode其实是有特定的使用场景的，比如List或者数组就不会用到hashCode，如果是HashMap、HashSet、HashTale，那么hashCode就十分重要了。</p>
-<p>这是因为在类似HashSet的集合中，是需要对元素去重，那么如何判断两个元素是相同的呢？如果每次调用equals，那么代价有点大，这是因为如果对象内部的属性很多，equals一般需要对比每一项。所以就是用hashCode作为对比的方法。</p>
-<p>下面看看Hashtable中添加一个元素的逻辑：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">public synchronized V put(K key, V value) &#123;</span><br><span class="line">        // 检查value是否为空</span><br><span class="line">        if (value == null) &#123;</span><br><span class="line">            throw new NullPointerException();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        // 确保key没有在table中</span><br><span class="line">        Entry&lt;?,?&gt; tab[] = table;</span><br><span class="line">        int hash = key.hashCode();//获取key的hash值</span><br><span class="line">        // 通过对table的length取余，确定对应的存储位置</span><br><span class="line">        int index = (hash &amp; 0x7FFFFFFF) % tab.length;</span><br><span class="line">        // 挨个对比是否相同</span><br><span class="line">        Entry&lt;K,V&gt; entry = (Entry&lt;K,V&gt;)tab[index];</span><br><span class="line">        for(; entry != null ; entry = entry.next) &#123;</span><br><span class="line">            if ((entry.hash == hash) &amp;&amp; entry.key.equals(key)) &#123;</span><br><span class="line">                V old = entry.value;</span><br><span class="line">                entry.value = value;</span><br><span class="line">                return old;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        addEntry(hash, key, value, index);</span><br><span class="line">        return null;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
-<p>在HashMap和HashSet中比较类似，都是下面的逻辑：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public V put(K key, V value) &#123;</span><br><span class="line">    return putVal(hash(key), key, value, false, true);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">static final int hash(Object key) &#123;</span><br><span class="line">    int h;</span><br><span class="line">    return (key == null) ? 0 : (h = key.hashCode()) ^ (h &gt;&gt;&gt; 16);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>可以看到它们都使用了HashCode，只不过是方式方法不一样而已。</p>
-<p>在不同的对象中hashCode的生成规则也是不一样的，不过最终的目的都是返回一个int值。比如，在Integer中:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public static int hashCode(int value) &#123;</span><br><span class="line">    return value;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>在String中:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public int hashCode() &#123;</span><br><span class="line">    int h = hash;</span><br><span class="line">    if (h == 0 &amp;&amp; value.length &gt; 0) &#123;</span><br><span class="line">        char val[] = value;</span><br><span class="line"></span><br><span class="line">        for (int i = 0; i &lt; value.length; i++) &#123;</span><br><span class="line">            h = 31 * h + val[i];</span><br><span class="line">        &#125;</span><br><span class="line">        hash = h;</span><br><span class="line">    &#125;</span><br><span class="line">    return h;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>因此设计hashCode，需要遵循下面的原则：</p>
-<ol>
-<li>在程序期间，同一个对象调用hashCode，返回的是一个数</li>
-<li>如果x.equals(y)返回true，那么它们的hashCode肯定也相等</li>
-<li>如果x.equals(y)返回false，那么它们的hashCode有可能相等，也有可能不相等。</li>
-</ol>
-<p>换句话说，判断两个对象是否相等：</p>
-<ol>
-<li>如果他们的hashCode不相等，那么它们肯定不想等；如果相同，还得对比equals</li>
-<li>如果两个对象的equals方法不同，那么对象就不同；否则，对象相同</li>
-</ol>
-<h1 id="Java数据类型"><a href="#Java数据类型" class="headerlink" title="Java数据类型"></a>Java数据类型</h1><p>Java包含了八种基本数据类型。六种数字类型，一种字符类型，一种Bool类型。</p>
-<table>
-<thead>
-<tr>
-<th>基本数据类型</th>
-<th>包装数据类型</th>
-<th>位数</th>
-<th>最小值</th>
-<th>最大值</th>
-<th>默认值 </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>byte</td>
-<td>Byte</td>
-<td>8位</td>
-<td>-2^7</td>
-<td>2^7-1</td>
-<td>0 </td>
-</tr>
-<tr>
-<td>short</td>
-<td>Short</td>
-<td>16位</td>
-<td>-2^15</td>
-<td>2^15-1</td>
-<td>0</td>
-</tr>
-<tr>
-<td>int</td>
-<td>Integer</td>
-<td>32位</td>
-<td>-2^31</td>
-<td>2^31-1</td>
-<td>0</td>
-</tr>
-<tr>
-<td>long</td>
-<td>Long</td>
-<td>64位</td>
-<td>-2^63</td>
-<td>2^63-1</td>
-<td>0L</td>
-</tr>
-<tr>
-<td>float</td>
-<td>Float</td>
-<td>32位</td>
-<td>1.4E-45</td>
-<td>3.4028235E38</td>
-</tr>
-<tr>
-<td>double</td>
-<td>Double</td>
-<td>64位</td>
-<td>4.9E-324</td>
-<td>1.7976931348623157E308 </td>
-</tr>
-<tr>
-<td>boolean</td>
-<td>Boolean</td>
-<td>1位</td>
-</tr>
-<tr>
-<td>char</td>
-<td>Char</td>
-<td>16位 </td>
-</tr>
-</tbody>
-</table>
-<p>数据类型可以自动转换：</p>
-<p>低  ———————————————&gt;  高</p>
-<p>byte,short,char—&gt; int —&gt; long—&gt; float —&gt; double </p>
-
+        <p>equals和==是java里面和基础的问题，相关的hashcode也是很多集合框架中很关键的技术点。<br>
+        
+          <a class="article-more-a" href="/2017/10/28/Java基础之-equals-hashcode和数据类型/#more">more >></a>
+        
       
 
       
@@ -1329,30 +873,10 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <blockquote>
-<p>在生产环境下，日志是最好的问题调试和跟踪方法，因此日志的地位是十分重要的。我们平时经常使用的log4j,slf4j,logback等等，他们的配置上大同小异。这里就结合Spring Boot配置一下Logback的日志。</p>
-</blockquote>
-<h2 id="默认最简单的配置"><a href="#默认最简单的配置" class="headerlink" title="默认最简单的配置"></a>默认最简单的配置</h2><p>默认情况下，如果对日志没有特殊处理，可以直接基于application.properties进行配置。</p>
-<p>常用的参数有：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">logging.level</span><br></pre></td></tr></table></figure></p>
-<p>配置日志的级别</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">logging.file</span><br><span class="line">logging.path</span><br></pre></td></tr></table></figure>
-<p>这两个参数只能配置一个生效，一个是文件（可以有绝对路径或者相对路径）；另一个是路径，文件的名称会默认为spring.log</p>
-<p>日志默认按照大小进行切分，由于我这边没有产生那么大的文件，因此没有做实验。</p>
-<p>这种方法最简单，但是不能处理那种复杂的日志轮转的机制。比如没天一个文件这种需求，因此可以考虑使用独立的日志文件进行配置:</p>
-<h2 id="使用独立的配置文件配置"><a href="#使用独立的配置文件配置" class="headerlink" title="使用独立的配置文件配置"></a>使用独立的配置文件配置</h2><p>如果有复杂的需求，可以像其他普通的web应用一样，配置独立的logback.xml:</p>
-<ul>
-<li>首先注意的是这个文件必须放在resources目录下（我这边发现，如果通过logging.config指向另一个目录下的logback.xml会在程序启动时报错，报无法解析该xml。猜想可能是在其他目录下的xml都被当做spring的配置或者有xml schema信息的配置，单纯的logback.xml它不认识）</li>
-</ul>
-<p>然后在application.properties文件中加入:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 配置logback</span><br><span class="line">logging.config=classpath:logback-spring.xml</span><br></pre></td></tr></table></figure></p>
-<p>即可。</p>
-<p>注意如果是<code>logging.config=classpath:xxxx/logback-spring.xml</code>,就不行了哈！我试过好多次！</p>
-<p>配置的内容基本可以参考下面的来：<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span><br><span class="line"><span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 属性文件 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"processName"</span> <span class="attr">value</span>=<span class="string">"xxx"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"logDir"</span> <span class="attr">value</span>=<span class="string">"/opt/logs/xxx"</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- 默认的控制台日志输出，一般生产环境都是后台启动，这个没太大作用 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">appender</span> <span class="attr">name</span>=<span class="string">"stdout"</span> <span class="attr">class</span>=<span class="string">"ch.qos.logback.core.ConsoleAppender"</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--&lt;Encoding&gt;UTF-8&lt;/Encoding&gt;--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">layout</span> <span class="attr">class</span>=<span class="string">"ch.qos.logback.classic.PatternLayout"</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">pattern</span>&gt;</span>%date [%thread] %-5level %logger&#123;50&#125;:%L - %msg%n<span class="tag">&lt;/<span class="name">pattern</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">layout</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">appender</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- 配置文件轮转 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">appender</span> <span class="attr">name</span>=<span class="string">"logfile"</span> <span class="attr">class</span>=<span class="string">"ch.qos.logback.core.rolling.RollingFileAppender"</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--&lt;Encoding&gt;UTF-8&lt;/Encoding&gt;--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">File</span>&gt;</span>$&#123;logDir&#125;/service.log<span class="tag">&lt;/<span class="name">File</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">rollingPolicy</span> <span class="attr">class</span>=<span class="string">"ch.qos.logback.core.rolling.TimeBasedRollingPolicy"</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">FileNamePattern</span>&gt;</span>$&#123;logDir&#125;/history/service.%d&#123;yyyy-MM-dd&#125;.log.gz<span class="tag">&lt;/<span class="name">FileNamePattern</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">maxHistory</span>&gt;</span>30<span class="tag">&lt;/<span class="name">maxHistory</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">rollingPolicy</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">layout</span> <span class="attr">class</span>=<span class="string">"ch.qos.logback.classic.PatternLayout"</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">pattern</span>&gt;</span>%date [%thread] %-5level %logger&#123;50&#125;:%L - %msg%n<span class="tag">&lt;/<span class="name">pattern</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">layout</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">appender</span>&gt;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- 修改其他包的日志输出级别 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">logger</span> <span class="attr">name</span>=<span class="string">"org.apache.zookeeper"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">level</span> <span class="attr">value</span>=<span class="string">"WARN"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">logger</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- root 默认日志配置 ， 注意这里的级别哈！小心生产环境用DEBUG，压爆你的磁盘！--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">root</span> <span class="attr">level</span>=<span class="string">"INFO"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">appender-ref</span> <span class="attr">ref</span>=<span class="string">"logfile"</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">appender-ref</span> <span class="attr">ref</span>=<span class="string">"stdout"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">root</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
-<li><a href="http://blog.csdn.net/gebitan505/article/details/70142155?locationNum=1&amp;fps=1" target="_blank" rel="noopener">Spring Boot 日志框架配置</a></li>
-<li><a href="http://www.cnblogs.com/Sinte-Beuve/p/5758971.html" target="_blank" rel="noopener">slf4j,log4j,logback的关系</a></li>
-<li><a href="https://docs.spring.io/spring-boot/docs/1.5.6.RELEASE/reference/htmlsingle/#boot-documentation" target="_blank" rel="noopener">Spring Boot官方文档，这个必须有！</a></li>
-</ul>
-
+        <p>在生产环境下，日志是最好的问题调试和跟踪方法，因此日志的地位是十分重要的。我们平时经常使用的log4j,slf4j,logback等等，他们的配置上大同小异。这里就结合Spring Boot配置一下Logback的日志。<br>
+        
+          <a class="article-more-a" href="/2017/08/31/spring-boot-日志配置/#more">more >></a>
+        
       
 
       
@@ -1391,6 +915,123 @@
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2017/08/31/spring-boot-日志配置/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-java中的引用类型，强软弱虚" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/09/java中的引用类型，强软弱虚/">java中的引用类型，强软弱虚</a>
+    </h1>
+  
+
+        
+        <a href="/2017/01/09/java中的引用类型，强软弱虚/" class="archive-article-date">
+  	<time datetime="2017-01-09T05:00:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-01-09</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>在Java里面，是不需要太过于关乎垃圾回收，但是这并不意味着开发者可以不了解垃圾回收的机制，况且在java中内存泄露也是家常便饭的事情。因此了解垃圾回收的相关知识就显得很重要了。<br><!--mpore--></p>
+<blockquote>
+<p>在Java里面，是不需要太过于关乎垃圾回收，但是这并不意味着开发者可以不了解垃圾回收的机制，况且在java中内存泄露也是家常便饭的事情。因此了解垃圾回收的相关知识就显得很重要了。</p>
+</blockquote>
+<p>引用，在垃圾回收中是一个很关键的概念，它关系到如何辨别这个对象是否被回收，什么时机回收。</p>
+<h2 id="引用的类型"><a href="#引用的类型" class="headerlink" title="引用的类型"></a>引用的类型</h2><p>在Java中引用的类型可以分为四个类型，依次是：</p>
+<ul>
+<li>强引用：在任何时间JVM都不会进行回收</li>
+<li>软引用：在内存不够的时候，JVM会进行回收</li>
+<li>弱引用：只要进行垃圾回收，就会触发回收</li>
+<li>虚引用：不知道啥时候就被回收了，可以理解为没引用一个样</li>
+</ul>
+<p>因此，按照JVM对他们回收的几率从小到大依次为：</p>
+<p>强引用&lt;软引用&lt;弱引用&lt;虚引用</p>
+<p>也就是说JVM对强引用的回收能力最小，对虚引用的回收能力最大。</p>
+<h2 id="引用分类的作用"><a href="#引用分类的作用" class="headerlink" title="引用分类的作用"></a>引用分类的作用</h2><p>一般我们编写的代码都是强引用的，比如:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Person p = <span class="keyword">new</span> Person();</span><br><span class="line">Person p1 = p;</span><br></pre></td></tr></table></figure></p>
+<p><code>p</code>和<code>p1</code>都指向了创建的Person对象，他们都是强引用的。如果想要回收这个对象，只有<code>p1</code>和<code>p</code>都指向<code>null</code>后，才可以。</p>
+<p>那么，有一些场景下往往引用清除的不及时，就会造成内存泄露，一些对象无法回收；无法回收的对象如果积累很多，就会造成<code>OUT OF MEMORY</code>——<code>OOM</code>.</p>
+<p>举个例子，在很多的代码里面都喜欢用Map作为内存缓存的容器，如果你写出了这样的代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;String,Object&gt; map = <span class="keyword">new</span> HashMap&lt;String,String&gt;();</span><br><span class="line"><span class="keyword">while</span>(<span class="keyword">true</span>)&#123;</span><br><span class="line">    Object value = <span class="keyword">new</span> XXX();</span><br><span class="line">    map.add(key,value);</span><br><span class="line">    value = <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>虽然说，后面的value被设置成Null，但是map里面却仍然保留了对象的引用，因此这个对象实际上是无法被回收的。</p>
+<p>做个测试：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WeakTest</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MB = <span class="number">1024</span> * <span class="number">512</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">static</span> String <span class="title">createLongString</span><span class="params">(<span class="keyword">int</span> length)</span> </span>&#123;</span><br><span class="line">        StringBuilder sb = <span class="keyword">new</span> StringBuilder(length);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; length; i++)</span><br><span class="line">            sb.append(<span class="string">'a'</span>);</span><br><span class="line">        sb.append(System.nanoTime());</span><br><span class="line">        <span class="keyword">return</span> sb.toString();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Map&lt;Integer,String&gt; substrings = <span class="keyword">new</span> HashMap();<span class="comment">//强引用的Map</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt; <span class="number">1000000</span>; i++)&#123;</span><br><span class="line">            String longStr = createLongString(MB);</span><br><span class="line">            substrings.put(i,longStr);</span><br><span class="line"><span class="comment">//            longStr = null;</span></span><br><span class="line"><span class="comment">//            substrings.remove(i);</span></span><br><span class="line">            System.out.println(i);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>如果注释的两句话不被打开，那么很快就会内存溢出。除非你两边都去解除应用，可想而知，程序员做这种工作实在是太痛苦了。</p>
+<h4 id="不要担心，这个时候就可以应用到上面的不同类型的引用知识了"><a href="#不要担心，这个时候就可以应用到上面的不同类型的引用知识了" class="headerlink" title="不要担心，这个时候就可以应用到上面的不同类型的引用知识了"></a>不要担心，这个时候就可以应用到上面的不同类型的引用知识了</h4><p>在Java里面，JDK为我们提供了一个弱引用的集合，WeakHashMap。它会在垃圾回收的时候尝试回收集合里面的对象。当然根据垃圾回收的时机，也可以选择软引用的集合。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Map&lt;Integer,String&gt; substrings = <span class="keyword">new</span> WeakHashMap();<span class="comment">//弱引用的Map</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt; <span class="number">1000000</span>; i++)&#123;</span><br><span class="line">            String longStr = createLongString(MB);</span><br><span class="line">            substrings.put(i,longStr);</span><br><span class="line">            System.out.println(i);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>这样就不担心内存溢出了。</p>
+<h4 id="场景设想"><a href="#场景设想" class="headerlink" title="场景设想"></a>场景设想</h4><p>比如，你的系统需要引用大量的资源相关的缓存，但是还没有引入redis等缓存系统，那么就可以使用这种方式。</p>
+<h2 id="虚引用"><a href="#虚引用" class="headerlink" title="虚引用"></a>虚引用</h2><p>虚引用的使用场景就比较鸡肋了，我也想不出什么时候会使用它。但是它跟其他的引用都有一种场景，就是在垃圾回收的时候，把引用放在回收队列里面，针对这个队列可以做一些操作。这种方式比finalize()要文档的多..<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PhantomTest</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> isRun = <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        String abc = <span class="keyword">new</span> String(<span class="string">"abc"</span>);</span><br><span class="line">        System.out.println(abc.getClass() + <span class="string">"@"</span> + abc.hashCode());</span><br><span class="line">        <span class="keyword">final</span> ReferenceQueue referenceQueue = <span class="keyword">new</span> ReferenceQueue&lt;String&gt;();</span><br><span class="line">        <span class="keyword">new</span> Thread() &#123;</span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                    <span class="keyword">while</span> (isRun) &#123;</span><br><span class="line">                        Object o = referenceQueue.poll();</span><br><span class="line">                        <span class="keyword">if</span> (o != <span class="keyword">null</span>) &#123;</span><br><span class="line">                            <span class="keyword">try</span> &#123;</span><br><span class="line">                                Field rereferent = Reference.class.getDeclaredField(<span class="string">"referent"</span>);</span><br><span class="line">                                rereferent.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">                                Object result = rereferent.get(o);</span><br><span class="line">                                System.out.println(<span class="string">"gc will collect:"</span>+ result.getClass() + <span class="string">"@"</span>+ result.hashCode());</span><br><span class="line">                            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                                e.printStackTrace();</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;.start();</span><br><span class="line">            PhantomReference&lt;String&gt; abcWeakRef = <span class="keyword">new</span> PhantomReference&lt;String&gt;(abc,referenceQueue);</span><br><span class="line">            abc = <span class="keyword">null</span>;</span><br><span class="line">            Thread.currentThread().sleep(<span class="number">3000</span>);</span><br><span class="line">            System.gc();</span><br><span class="line">            Thread.currentThread().sleep(<span class="number">3000</span>);</span><br><span class="line">            isRun = <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>首先需要创建一个引用队列：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> ReferenceQueue referenceQueue = <span class="keyword">new</span> ReferenceQueue&lt;String&gt;();</span><br></pre></td></tr></table></figure></p>
+<p>创建虚引用，并关联到引用队列<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PhantomReference&lt;String&gt; abcWeakRef = <span class="keyword">new</span> PhantomReference&lt;String&gt;(abc,referenceQueue);</span><br></pre></td></tr></table></figure></p>
+<p>等引用被回收的时候，就会在<code>Object o = referenceQueue.poll();</code>取到对象引用了。</p>
+<blockquote>
+<p>虽然一般不会有这种底层的使用场景，但是了解一点总归是好的。</p>
+</blockquote>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">java</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/技术//" class="article-tag-list-link color3">技术</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2017/01/09/java中的引用类型，强软弱虚/">展开全文 >></a>
         </p>
       
 
@@ -1543,10 +1184,6 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">spring boot</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">闲扯</a>
               </li>
             
             <div class="clearfix"></div>

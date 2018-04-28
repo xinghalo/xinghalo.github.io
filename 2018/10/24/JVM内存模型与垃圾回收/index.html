@@ -8,13 +8,13 @@
   <link rel="dns-prefetch" href="https://xinghalo.github.io">
   <title>JVM内存模型与垃圾回收 | xingoo的blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Java开发有个很基础的问题，虽然我们平时接触的不多，但是了解它却成为Java开发的必备基础——这就是JVM。在C++中我们需要手动申请内存然后释放内存，否则就会出现对象已经不再使用内存却仍被占用的情况。在Java中JVM内置了垃圾回收的机制，帮助开发者承担对象的创建和释放的工作，极大的减轻了开发的负担。那是不是我们就不需要了解JVM了，显然在做一些优化或者深入研究应用性能的时候，JVM还是起了">
+  <meta name="description" content="Java开发有个很基础的问题，虽然我们平时接触的不多，但是了解它却成为Java开发的必备基础——这就是JVM。在C++中我们需要手动申请内存然后释放内存，否则就会出现对象已经不再使用内存却仍被占用的情况。在Java中JVM内置了垃圾回收的机制，帮助开发者承担对象的创建和释放的工作，极大的减轻了开发的负担。那是不是我们就不需要了解JVM了，显然在做一些优化或者深入研究应用性能的时候，JVM还是起了很">
 <meta name="keywords" content="java">
 <meta property="og:type" content="article">
 <meta property="og:title" content="JVM内存模型与垃圾回收">
 <meta property="og:url" content="https://xinghalo.github.io/2018/10/24/JVM内存模型与垃圾回收/index.html">
 <meta property="og:site_name" content="xingoo的blog">
-<meta property="og:description" content="Java开发有个很基础的问题，虽然我们平时接触的不多，但是了解它却成为Java开发的必备基础——这就是JVM。在C++中我们需要手动申请内存然后释放内存，否则就会出现对象已经不再使用内存却仍被占用的情况。在Java中JVM内置了垃圾回收的机制，帮助开发者承担对象的创建和释放的工作，极大的减轻了开发的负担。那是不是我们就不需要了解JVM了，显然在做一些优化或者深入研究应用性能的时候，JVM还是起了">
+<meta property="og:description" content="Java开发有个很基础的问题，虽然我们平时接触的不多，但是了解它却成为Java开发的必备基础——这就是JVM。在C++中我们需要手动申请内存然后释放内存，否则就会出现对象已经不再使用内存却仍被占用的情况。在Java中JVM内置了垃圾回收的机制，帮助开发者承担对象的创建和释放的工作，极大的减轻了开发的负担。那是不是我们就不需要了解JVM了，显然在做一些优化或者深入研究应用性能的时候，JVM还是起了很">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="http://img.blog.csdn.net/20150720152805765?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQv/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center">
 <meta property="og:image" content="https://s5.51cto.com/wyfs02/M01/A4/06/wKioL1mlFPzT7_hLAAA-qYFsUa8977.png-wh_651x-s_286560225.png">
@@ -27,10 +27,10 @@
 <meta property="og:image" content="http://images2015.cnblogs.com/blog/467583/201706/467583-20170628093724414-184415121.png">
 <meta property="og:image" content="http://images2015.cnblogs.com/blog/467583/201706/467583-20170628093846008-2001476745.png">
 <meta property="og:image" content="http://images2015.cnblogs.com/blog/467583/201706/467583-20170628093914149-1103645311.png">
-<meta property="og:updated_time" content="2018-04-28T04:53:20.829Z">
+<meta property="og:updated_time" content="2018-04-28T09:08:05.135Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="JVM内存模型与垃圾回收">
-<meta name="twitter:description" content="Java开发有个很基础的问题，虽然我们平时接触的不多，但是了解它却成为Java开发的必备基础——这就是JVM。在C++中我们需要手动申请内存然后释放内存，否则就会出现对象已经不再使用内存却仍被占用的情况。在Java中JVM内置了垃圾回收的机制，帮助开发者承担对象的创建和释放的工作，极大的减轻了开发的负担。那是不是我们就不需要了解JVM了，显然在做一些优化或者深入研究应用性能的时候，JVM还是起了">
+<meta name="twitter:description" content="Java开发有个很基础的问题，虽然我们平时接触的不多，但是了解它却成为Java开发的必备基础——这就是JVM。在C++中我们需要手动申请内存然后释放内存，否则就会出现对象已经不再使用内存却仍被占用的情况。在Java中JVM内置了垃圾回收的机制，帮助开发者承担对象的创建和释放的工作，极大的减轻了开发的负担。那是不是我们就不需要了解JVM了，显然在做一些优化或者深入研究应用性能的时候，JVM还是起了很">
 <meta name="twitter:image" content="http://img.blog.csdn.net/20150720152805765?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQv/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center">
   
     <link rel="alternative" href="/atom.xml" title="xingoo的blog" type="application/atom+xml">
@@ -191,7 +191,8 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <blockquote>
+        <p>Java开发有个很基础的问题，虽然我们平时接触的不多，但是了解它却成为Java开发的必备基础——这就是JVM。在C++中我们需要手动申请内存然后释放内存，否则就会出现对象已经不再使用内存却仍被占用的情况。在Java中JVM内置了垃圾回收的机制，帮助开发者承担对象的创建和释放的工作，极大的减轻了开发的负担。那是不是我们就不需要了解JVM了，显然在做一些优化或者深入研究应用性能的时候，JVM还是起了很关键的作用的。因此本篇就总结性的描述下JVM的内存模型与垃圾回收相关的知识。<br><a id="more"></a></p>
+<blockquote>
 <p>Java开发有个很基础的问题，虽然我们平时接触的不多，但是了解它却成为Java开发的必备基础——这就是JVM。在C++中我们需要手动申请内存然后释放内存，否则就会出现对象已经不再使用内存却仍被占用的情况。在Java中JVM内置了垃圾回收的机制，帮助开发者承担对象的创建和释放的工作，极大的减轻了开发的负担。那是不是我们就不需要了解JVM了，显然在做一些优化或者深入研究应用性能的时候，JVM还是起了很关键的作用的。因此本篇就总结性的描述下JVM的内存模型与垃圾回收相关的知识。</p>
 </blockquote>
 <p>本文的主要内容如下：</p>
@@ -418,8 +419,8 @@
     </a>
   
   
-    <a href="/2018/04/27/第一篇/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">第一篇</div>
+    <a href="/2017/11/16/Thread中的sleep-wait-notify-notifyall/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Thread中的sleep,wait,notify,notifyall</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -571,10 +572,6 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">spring boot</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">闲扯</a>
               </li>
             
             <div class="clearfix"></div>
