@@ -6,16 +6,32 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://xinghalo.github.io">
-  <title>Archives: 2018/10 | xingoo的blog</title>
+  <title>JVM内存模型与垃圾回收 | xingoo的blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="keywords" content="xingoo">
-<meta property="og:type" content="website">
-<meta property="og:title" content="xingoo的blog">
-<meta property="og:url" content="https://xinghalo.github.io/archives/2018/10/index.html">
+  <meta name="description" content="Java开发有个很基础的问题，虽然我们平时接触的不多，但是了解它却成为Java开发的必备基础——这就是JVM。在C++中我们需要手动申请内存然后释放内存，否则就会出现对象已经不再使用内存却仍被占用的情况。在Java中JVM内置了垃圾回收的机制，帮助开发者承担对象的创建和释放的工作，极大的减轻了开发的负担。那是不是我们就不需要了解JVM了，显然在做一些优化或者深入研究应用性能的时候，JVM还是起了很">
+<meta name="keywords" content="java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM内存模型与垃圾回收">
+<meta property="og:url" content="https://xinghalo.github.io/2017/10/24/JVM内存模型与垃圾回收/index.html">
 <meta property="og:site_name" content="xingoo的blog">
+<meta property="og:description" content="Java开发有个很基础的问题，虽然我们平时接触的不多，但是了解它却成为Java开发的必备基础——这就是JVM。在C++中我们需要手动申请内存然后释放内存，否则就会出现对象已经不再使用内存却仍被占用的情况。在Java中JVM内置了垃圾回收的机制，帮助开发者承担对象的创建和释放的工作，极大的减轻了开发的负担。那是不是我们就不需要了解JVM了，显然在做一些优化或者深入研究应用性能的时候，JVM还是起了很">
 <meta property="og:locale" content="default">
+<meta property="og:image" content="http://img.blog.csdn.net/20150720152805765?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQv/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center">
+<meta property="og:image" content="https://s5.51cto.com/wyfs02/M01/A4/06/wKioL1mlFPzT7_hLAAA-qYFsUa8977.png-wh_651x-s_286560225.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/341412/201703/341412-20170310115901922-1449104767.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/341412/201703/341412-20170310120953625-1648207853.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/341412/201703/341412-20170310120436734-894591806.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/341412/201703/341412-20170310111906594-1376910719.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/467583/201706/467583-20170628093656618-2097152177.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/467583/201706/467583-20170628093636461-1904264753.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/467583/201706/467583-20170628093724414-184415121.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/467583/201706/467583-20170628093846008-2001476745.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/467583/201706/467583-20170628093914149-1103645311.png">
+<meta property="og:updated_time" content="2018-04-28T09:49:45.462Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="xingoo的blog">
+<meta name="twitter:title" content="JVM内存模型与垃圾回收">
+<meta name="twitter:description" content="Java开发有个很基础的问题，虽然我们平时接触的不多，但是了解它却成为Java开发的必备基础——这就是JVM。在C++中我们需要手动申请内存然后释放内存，否则就会出现对象已经不再使用内存却仍被占用的情况。在Java中JVM内置了垃圾回收的机制，帮助开发者承担对象的创建和释放的工作，极大的减轻了开发的负担。那是不是我们就不需要了解JVM了，显然在做一些优化或者深入研究应用性能的时候，JVM还是起了很">
+<meta name="twitter:image" content="http://img.blog.csdn.net/20150720152805765?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQv/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center">
   
     <link rel="alternative" href="/atom.xml" title="xingoo的blog" type="application/atom+xml">
   
@@ -57,8 +73,6 @@
 				<li><a href="/">主页</a></li>
 	        
 				<li><a href="/categories/技术">文章</a></li>
-	        
-				<li><a href="/categories/生活">生活</a></li>
 	        
 				<li><a href="/categories/读书">读书</a></li>
 	        
@@ -116,8 +130,6 @@
 			
 				
 			
-				
-			
 			
 			
 			<nav class="header-nav">
@@ -134,13 +146,11 @@
 				<ul style="width: 70%">
 				
 				
-					<li style="width: 25%"><a href="/">主页</a></li>
+					<li style="width: 33.333333333333336%"><a href="/">主页</a></li>
 		        
-					<li style="width: 25%"><a href="/categories/技术">文章</a></li>
+					<li style="width: 33.333333333333336%"><a href="/categories/技术">文章</a></li>
 		        
-					<li style="width: 25%"><a href="/categories/生活">生活</a></li>
-		        
-					<li style="width: 25%"><a href="/categories/读书">读书</a></li>
+					<li style="width: 33.333333333333336%"><a href="/categories/读书">读书</a></li>
 		        
 				</ul>
 			</nav>
@@ -155,36 +165,158 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-JVM内存模型与垃圾回收" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2018" class="archive-year">2018</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/10/29/接口与抽象类/" class="archive-article-date">
-  	<time datetime="2018-10-29T04:41:22.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-10-29</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/10/29/接口与抽象类/">接口与抽象类,枚举与泛型</a>
+    <h1 class="article-title" itemprop="name">
+      JVM内存模型与垃圾回收
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2017/10/24/JVM内存模型与垃圾回收/" class="archive-article-date">
+  	<time datetime="2017-10-24T04:52:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-10-24</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Java开发有个很基础的问题，虽然我们平时接触的不多，但是了解它却成为Java开发的必备基础——这就是JVM。在C++中我们需要手动申请内存然后释放内存，否则就会出现对象已经不再使用内存却仍被占用的情况。在Java中JVM内置了垃圾回收的机制，帮助开发者承担对象的创建和释放的工作，极大的减轻了开发的负担。那是不是我们就不需要了解JVM了，显然在做一些优化或者深入研究应用性能的时候，JVM还是起了很关键的作用的。因此本篇就总结性的描述下JVM的内存模型与垃圾回收相关的知识。<br><a id="more"></a></p>
+<blockquote>
+<p>Java开发有个很基础的问题，虽然我们平时接触的不多，但是了解它却成为Java开发的必备基础——这就是JVM。在C++中我们需要手动申请内存然后释放内存，否则就会出现对象已经不再使用内存却仍被占用的情况。在Java中JVM内置了垃圾回收的机制，帮助开发者承担对象的创建和释放的工作，极大的减轻了开发的负担。那是不是我们就不需要了解JVM了，显然在做一些优化或者深入研究应用性能的时候，JVM还是起了很关键的作用的。因此本篇就总结性的描述下JVM的内存模型与垃圾回收相关的知识。</p>
+</blockquote>
+<p>本文的主要内容如下：</p>
+<ul>
+<li>内存模型</li>
+<li>垃圾回收</li>
+<li>参考文章</li>
+</ul>
+<h1 id="内存模型"><a href="#内存模型" class="headerlink" title="内存模型"></a>内存模型</h1><p><img src="http://img.blog.csdn.net/20150720152805765?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQv/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt=""></p>
+<h2 id="各部分的功能"><a href="#各部分的功能" class="headerlink" title="各部分的功能"></a>各部分的功能</h2><p>这几个存储区最主要的就是栈区和堆区，那么什么是栈什么是堆呢？说的简单点，栈里面存放的是基本的数据类型和引用，而堆里面则是存放各种对象实例的。<br><img src="https://s5.51cto.com/wyfs02/M01/A4/06/wKioL1mlFPzT7_hLAAA-qYFsUa8977.png-wh_651x-s_286560225.png" alt=""></p>
+<p>堆与栈分开设计是为什么呢？ </p>
+<ul>
+<li>栈存储了处理逻辑、堆存储了具体的数据，这样隔离设计更为清晰</li>
+<li>堆与栈分离，使得堆可以被多个栈共享。</li>
+<li>栈保存了上下文的信息，因此只能向上增长；而堆是动态分配</li>
+</ul>
+<p>栈的大小可以通过-XSs设置，如果不足的话，会引起java.lang.StackOverflowError的异常</p>
+<h4 id="栈区"><a href="#栈区" class="headerlink" title="栈区"></a>栈区</h4><p>线程私有，生命周期与线程相同。每个方法执行的时候都会创建一个栈帧（stack frame）用于存放 局部变量表、操作栈、动态链接、方法出口。</p>
+<h4 id="堆"><a href="#堆" class="headerlink" title="堆"></a>堆</h4><p>存放对象实例，所有的对象的内存都在这里分配。垃圾回收主要就是作用于这里的。</p>
+<ul>
+<li>堆得内存由-Xms指定，默认是物理内存的1/64；最大的内存由-Xmx指定，默认是物理内存的1/4。</li>
+<li>默认空余的堆内存小于40%时，就会增大，直到-Xmx设置的内存。具体的比例可以由-XX:MinHeapFreeRatio指定</li>
+<li>空余的内存大于70%时，就会减少内存，直到-Xms设置的大小。具体由-XX:MaxHeapFreeRatio指定。</li>
+</ul>
+<p>因此一般都建议把这两个参数设置成一样大，可以避免JVM在不断调整大小。</p>
+<h4 id="程序计数器"><a href="#程序计数器" class="headerlink" title="程序计数器"></a>程序计数器</h4><p>这里记录了线程执行的字节码的行号，在分支、循环、跳转、异常、线程恢复等都依赖这个计数器。</p>
+<h4 id="方法区"><a href="#方法区" class="headerlink" title="方法区"></a>方法区</h4><p>类型信息、字段信息、方法信息、其他信息</p>
+<p>总结</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>特征</th>
+<th>作用</th>
+<th>配置</th>
+<th>异常</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>栈区</td>
+<td>线程私有，使用一段连续的内存空间</td>
+<td>存放局部变量表、操作栈、动态链接、方法出口</td>
+<td>-XSs</td>
+<td>StackOverflowError OutOfMemoryError</td>
+</tr>
+<tr>
+<td>堆</td>
+<td>线程共享，生命周期与虚拟机相同</td>
+<td>保存对象实例</td>
+<td>-Xms -Xmx -Xmn</td>
+<td>OutOfMemoryError</td>
+</tr>
+<tr>
+<td>程序计数器</td>
+<td>线程私有、占用内存小</td>
+<td>字节码行号</td>
+<td>无</td>
+<td>无</td>
+</tr>
+<tr>
+<td>方法区</td>
+<td>线程共享</td>
+<td>存储类加载信息、常量、静态变量等</td>
+<td>-XX:PermSize -XX:MaxPermSize</td>
+<td>OutOfMemoryError</td>
+</tr>
+</tbody>
+</table>
+<h1 id="垃圾回收"><a href="#垃圾回收" class="headerlink" title="垃圾回收"></a>垃圾回收</h1><h2 id="如何定义垃圾"><a href="#如何定义垃圾" class="headerlink" title="如何定义垃圾"></a>如何定义垃圾</h2><p>有两种方式，一种是引用计数（但是无法解决循环引用的问题）；另一种就是可达性分析。</p>
+<p>判断对象可以回收的情况：</p>
+<ul>
+<li>显示的把某个引用置位NULL或者指向别的对象</li>
+<li>局部引用指向的对象</li>
+<li>弱引用关联的对象</li>
+</ul>
+<h2 id="垃圾回收的方法"><a href="#垃圾回收的方法" class="headerlink" title="垃圾回收的方法"></a>垃圾回收的方法</h2><h4 id="Mark-Sweep标记-清除算法"><a href="#Mark-Sweep标记-清除算法" class="headerlink" title="Mark-Sweep标记-清除算法"></a>Mark-Sweep标记-清除算法</h4><p><img src="http://images2015.cnblogs.com/blog/341412/201703/341412-20170310115901922-1449104767.png" alt=""></p>
+<p>这种方法优点就是减少停顿时间，但是缺点是会造成内存碎片。</p>
+<h4 id="Copying复制算法"><a href="#Copying复制算法" class="headerlink" title="Copying复制算法"></a>Copying复制算法</h4><p><img src="http://images2015.cnblogs.com/blog/341412/201703/341412-20170310120953625-1648207853.png" alt=""></p>
+<p>这种方法不涉及到对象的删除，只是把可用的对象从一个地方拷贝到另一个地方，因此适合大量对象回收的场景，比如新生代的回收。</p>
+<h4 id="Mark-Compact标记-整理算法"><a href="#Mark-Compact标记-整理算法" class="headerlink" title="Mark-Compact标记-整理算法"></a>Mark-Compact标记-整理算法</h4><p><img src="http://images2015.cnblogs.com/blog/341412/201703/341412-20170310120436734-894591806.png" alt=""></p>
+<p>这种方法可以解决内存碎片问题，但是会增加停顿时间。</p>
+<h4 id="Generational-Collection-分代收集"><a href="#Generational-Collection-分代收集" class="headerlink" title="Generational Collection 分代收集"></a>Generational Collection 分代收集</h4><p>最后的这种方法是前面几种的合体，即目前JVM主要采取的一种方法，思想就是把JVM分成不同的区域。每种区域使用不同的垃圾回收方法。</p>
+<p><img src="http://images2015.cnblogs.com/blog/341412/201703/341412-20170310111906594-1376910719.png" alt=""></p>
+<p>上面可以看到堆分成三个区域：</p>
+<ul>
+<li>新生代(Young Generation)：用于存放新创建的对象，采用复制回收方法，如果在s0和s1之间复制一定次数后，转移到年老代中。这里的垃圾回收叫做minor GC; </li>
+<li>年老代(Old Generation)：这些对象垃圾回收的频率较低，采用的标记整理方法，这里的垃圾回收叫做 major GC。</li>
+<li>永久代(Permanent Generation)：存放Java本身的一些数据，当类不再使用时，也会被回收。</li>
+</ul>
+<h2 id="垃圾回收器"><a href="#垃圾回收器" class="headerlink" title="垃圾回收器"></a>垃圾回收器</h2><p><img src="http://images2015.cnblogs.com/blog/467583/201706/467583-20170628093656618-2097152177.png" alt=""></p>
+<h4 id="串行收集器-Serial"><a href="#串行收集器-Serial" class="headerlink" title="串行收集器 Serial"></a>串行收集器 Serial</h4><p>这种收集器就是以单线程的方式收集，垃圾回收的时候其他线程也不能工作。<br><img src="http://images2015.cnblogs.com/blog/467583/201706/467583-20170628093636461-1904264753.png" alt=""></p>
+<h4 id="并行收集器-Parallel"><a href="#并行收集器-Parallel" class="headerlink" title="并行收集器 Parallel"></a>并行收集器 Parallel</h4><p>以多线程的方式进行收集<br><img src="http://images2015.cnblogs.com/blog/467583/201706/467583-20170628093724414-184415121.png" alt=""></p>
+<h4 id="并发标记清除收集器-Concurrent-Mark-Sweep-Collector-CMS"><a href="#并发标记清除收集器-Concurrent-Mark-Sweep-Collector-CMS" class="headerlink" title="并发标记清除收集器 Concurrent Mark Sweep Collector, CMS"></a>并发标记清除收集器 Concurrent Mark Sweep Collector, CMS</h4><p>大致的流程为：初始标记–并发标记–重新标记–并发清除</p>
+<p><img src="http://images2015.cnblogs.com/blog/467583/201706/467583-20170628093846008-2001476745.png" alt=""></p>
+<h4 id="G1收集器-Garbage-First-Collector"><a href="#G1收集器-Garbage-First-Collector" class="headerlink" title="G1收集器 Garbage First Collector"></a>G1收集器 Garbage First Collector</h4><p>大致的流程为：初始标记–并发标记–最终标记–筛选回收</p>
+<p><img src="http://images2015.cnblogs.com/blog/467583/201706/467583-20170628093914149-1103645311.png" alt=""></p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="http://developer.51cto.com/art/200911/165015.htm" target="_blank" rel="noopener">http://developer.51cto.com/art/200911/165015.htm</a></p>
+<p><a href="http://www.importnew.com/19085.html" target="_blank" rel="noopener">http://www.importnew.com/19085.html</a></p>
+<p><a href="http://www.cnblogs.com/chengxuyuanzhilu/p/7088316.html" target="_blank" rel="noopener">http://www.cnblogs.com/chengxuyuanzhilu/p/7088316.html</a></p>
+<p>内存模型 <a href="http://blog.csdn.net/u012152619/article/details/46968883" target="_blank" rel="noopener">http://blog.csdn.net/u012152619/article/details/46968883</a></p>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -196,7 +328,7 @@
 		</ul>
 	</div>
 
-          
+      
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
@@ -209,66 +341,113 @@
 	</div>
 
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://xinghalo.github.io/2017/10/24/JVM内存模型与垃圾回收/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/10/24/JVM内存模型与垃圾回收/" class="archive-article-date">
-  	<time datetime="2018-10-24T04:52:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-10-24</time>
-</a>
+<nav id="article-nav">
+  
+    <a href="/2017/10/28/Java基础之-equals-hashcode和数据类型/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          Java基础之== equals hashcode和数据类型
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/08/31/spring-boot-日志配置/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">spring boot 日志配置</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/10/24/JVM内存模型与垃圾回收/">JVM内存模型与垃圾回收</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">java</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/技术//" class="article-tag-list-link color3">技术</a>
-        		</li>
-      		
-		</ul>
-	</div>
+        
+        
+    </div>
+</aside>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
+
   
   
-    </div></section>
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -291,8 +470,8 @@
 	var yiliaConfig = {
 		mathjax: true,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
@@ -388,6 +567,10 @@ MathJax.Hub.Queue(function() {
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">spring boot</a>
               </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">data</a>
+              </li>
             
             <div class="clearfix"></div>
           </ul>
@@ -436,6 +619,14 @@ MathJax.Hub.Queue(function() {
     	<section class="tools-section tools-section-friends" q-show="friends">
   		
         <ul class="search-ul">
+          
+            <li class="search-li">
+              <a href="http://www.ruanyifeng.com/home.html" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>阮一峰</a>
+            </li>
+          
+            <li class="search-li">
+              <a href="https://leetcode-cn.com/problemset/all/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>LeetCode</a>
+            </li>
           
             <li class="search-li">
               <a href="http://dyingbleed.com/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>李震</a>

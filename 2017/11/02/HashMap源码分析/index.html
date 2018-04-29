@@ -6,16 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://xinghalo.github.io">
-  <title>Archives: 2018/11 | xingoo的blog</title>
+  <title>HashMap源码分析 | xingoo的blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="keywords" content="xingoo">
-<meta property="og:type" content="website">
-<meta property="og:title" content="xingoo的blog">
-<meta property="og:url" content="https://xinghalo.github.io/archives/2018/11/index.html">
+  <meta name="description" content="HashMap不仅仅是java里面很重要的知识点，也是日常开发使用最多的集合框架。了解它的特性，会对日常开发有很大的帮助。">
+<meta name="keywords" content="java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HashMap源码分析">
+<meta property="og:url" content="https://xinghalo.github.io/2017/11/02/HashMap源码分析/index.html">
 <meta property="og:site_name" content="xingoo的blog">
+<meta property="og:description" content="HashMap不仅仅是java里面很重要的知识点，也是日常开发使用最多的集合框架。了解它的特性，会对日常开发有很大的帮助。">
 <meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-04-28T09:49:24.941Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="xingoo的blog">
+<meta name="twitter:title" content="HashMap源码分析">
+<meta name="twitter:description" content="HashMap不仅仅是java里面很重要的知识点，也是日常开发使用最多的集合框架。了解它的特性，会对日常开发有很大的帮助。">
   
     <link rel="alternative" href="/atom.xml" title="xingoo的blog" type="application/atom+xml">
   
@@ -57,8 +61,6 @@
 				<li><a href="/">主页</a></li>
 	        
 				<li><a href="/categories/技术">文章</a></li>
-	        
-				<li><a href="/categories/生活">生活</a></li>
 	        
 				<li><a href="/categories/读书">读书</a></li>
 	        
@@ -116,8 +118,6 @@
 			
 				
 			
-				
-			
 			
 			
 			<nav class="header-nav">
@@ -134,13 +134,11 @@
 				<ul style="width: 70%">
 				
 				
-					<li style="width: 25%"><a href="/">主页</a></li>
+					<li style="width: 33.333333333333336%"><a href="/">主页</a></li>
 		        
-					<li style="width: 25%"><a href="/categories/技术">文章</a></li>
+					<li style="width: 33.333333333333336%"><a href="/categories/技术">文章</a></li>
 		        
-					<li style="width: 25%"><a href="/categories/生活">生活</a></li>
-		        
-					<li style="width: 25%"><a href="/categories/读书">读书</a></li>
+					<li style="width: 33.333333333333336%"><a href="/categories/读书">读书</a></li>
 		        
 				</ul>
 			</nav>
@@ -155,36 +153,84 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-HashMap源码分析" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2018" class="archive-year">2018</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/11/03/Java中的列表/" class="archive-article-date">
-  	<time datetime="2018-11-03T04:33:53.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-11-03</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/11/03/Java中的列表/">Java中的列表</a>
+    <h1 class="article-title" itemprop="name">
+      HashMap源码分析
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2017/11/02/HashMap源码分析/" class="archive-article-date">
+  	<time datetime="2017-11-02T04:37:33.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-11-02</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>HashMap不仅仅是java里面很重要的知识点，也是日常开发使用最多的集合框架。了解它的特性，会对日常开发有很大的帮助。<br><a id="more"></a></p>
+<h2 id="哈希冲突"><a href="#哈希冲突" class="headerlink" title="哈希冲突"></a>哈希冲突</h2><p>哈希是指通过某种方法把数据转变成特定的数值，数值根据mod对应到不同的单元上。比如在Java中，字符串就是通过每个字符的编码来计算、数字是本身对应的值等等，不过就算是再好的哈希方法，也有可能出现两个不同的对象hash值相同的情况。如果在HashMap中，hashcode相同，它们就会被分配到对应的存储位置，此时就会出现冲突——也叫做哈希冲突。</p>
+<p>解决哈希冲突的方法有很多种：</p>
+<ol>
+<li>开放地址探测法：即如果出现哈希冲突，则按照一定的规则继续选择位置，如线性探测法再、二次探测再、伪随机探测等等。</li>
+<li>链地址法：如果出现冲突，则在冲突的位置后面形成链表进行存储。HashMap就是通过这种方式实现的</li>
+<li>再哈希法：这种方法是再换另一个哈希方法寻找存储的位置。</li>
+</ol>
+<h2 id="hashCode和equals"><a href="#hashCode和equals" class="headerlink" title="hashCode和equals"></a>hashCode和equals</h2><p>首先hashcode是经过一定的方法映射出的数值，而equals如果没有重写的话，是对比了每个内部的属性。总结的来说，如果两个对象hashcode相同，它们未必相等；如果hashcode不同，肯定不等。从另一个角度说，如果两个对象equals相等，它们肯定相等；如果equals不同，则它们不同。</p>
+<p>那么肯定会有人疑问，那还要hashcode干嘛咧？Hashcode其实就是在hashMap或者hashset进行快速比较的时候有用，可以快速的判断对像是否不同，如果hashcode相同，则再继续对比equals方法。这样可以节省大量的时间。</p>
+<h1 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h1><p>HashMap允许null的key和value，HashMap根HashTable很像，只不过非线程安全并且允许Null值。</p>
+<p>有两个参数会影响Map的性能，分别是初始容量<code>initial capacity</code>和负载参数<code>load facotr</code>(确定了什么时间增加hash table的容量)。当容量超过<code>load factor</code>*<code>initial capacity</code>时，就会进行扩容，然后执行rehash操作。</p>
+<p>默认load factor时0.75，它基本已经能提供一个不错的性能效果了。不过在使用的初期可以预估一下数据量，直接设置一个比较适合的初始值。</p>
+<p>注意：HashMap不是线程安全的，可以通过<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Map m = Collections.synchronizedMap(<span class="keyword">new</span> HashMap(...))</span><br></pre></td></tr></table></figure></p>
+<p>实现线程安全的map.</p>
+<h1 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">transient</span> Node&lt;K,V&gt;[] table;</span><br><span class="line"><span class="keyword">transient</span> Set&lt;Map.Entry&lt;K,V&gt;&gt; entrySet;</span><br><span class="line"><span class="keyword">int</span> threshold;</span><br><span class="line"><span class="keyword">final</span> <span class="keyword">float</span> loadFactor;</span><br></pre></td></tr></table></figure>
+<h1 id="新增"><a href="#新增" class="headerlink" title="新增"></a>新增</h1><p>如果key之前出现过，那么将会用新的value代替旧的value<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> V <span class="title">put</span><span class="params">(K key, V value)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> putVal(hash(key), key, value, <span class="keyword">false</span>, <span class="keyword">true</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">hash</span><span class="params">(Object key)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> h;</span><br><span class="line">    <span class="keyword">return</span> (key == <span class="keyword">null</span>) ? <span class="number">0</span> : (h = key.hashCode()) ^ (h &gt;&gt;&gt; <span class="number">16</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>主要的代码在这里：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">final</span> V <span class="title">putVal</span><span class="params">(<span class="keyword">int</span> hash, K key, V value, <span class="keyword">boolean</span> onlyIfAbsent,<span class="keyword">boolean</span> evict)</span> </span>&#123;</span><br><span class="line">    Node&lt;K,V&gt;[] tab; Node&lt;K,V&gt; p; <span class="keyword">int</span> n, i;</span><br><span class="line">    <span class="keyword">if</span> ((tab = table) == <span class="keyword">null</span> || (n = tab.length) == <span class="number">0</span>)</span><br><span class="line">        n = (tab = resize()).length;</span><br><span class="line">    <span class="keyword">if</span> ((p = tab[i = (n - <span class="number">1</span>) &amp; hash]) == <span class="keyword">null</span>)</span><br><span class="line">        tab[i] = newNode(hash, key, value, <span class="keyword">null</span>);</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        Node&lt;K,V&gt; e; K k;</span><br><span class="line">        <span class="keyword">if</span> (p.hash == hash &amp;&amp;</span><br><span class="line">            ((k = p.key) == key || (key != <span class="keyword">null</span> &amp;&amp; key.equals(k))))</span><br><span class="line">            e = p;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (p <span class="keyword">instanceof</span> TreeNode)</span><br><span class="line">            e = ((TreeNode&lt;K,V&gt;)p).putTreeVal(<span class="keyword">this</span>, tab, hash, key, value);</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> binCount = <span class="number">0</span>; ; ++binCount) &#123;</span><br><span class="line">                <span class="keyword">if</span> ((e = p.next) == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    p.next = newNode(hash, key, value, <span class="keyword">null</span>);</span><br><span class="line">                    <span class="comment">// 如果每个链表长度超过8，那么就转为红黑树</span></span><br><span class="line">                    <span class="keyword">if</span> (binCount &gt;= TREEIFY_THRESHOLD - <span class="number">1</span>) <span class="comment">// -1 for 1st</span></span><br><span class="line">                        treeifyBin(tab, hash);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (e.hash == hash &amp;&amp;</span><br><span class="line">                    ((k = e.key) == key || (key != <span class="keyword">null</span> &amp;&amp; key.equals(k))))</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                p = e;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (e != <span class="keyword">null</span>) &#123; <span class="comment">// existing mapping for key</span></span><br><span class="line">            V oldValue = e.value;</span><br><span class="line">            <span class="keyword">if</span> (!onlyIfAbsent || oldValue == <span class="keyword">null</span>)</span><br><span class="line">                e.value = value;</span><br><span class="line">            afterNodeAccess(e);</span><br><span class="line">            <span class="keyword">return</span> oldValue;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ++modCount;</span><br><span class="line">    <span class="keyword">if</span> (++size &gt; threshold)</span><br><span class="line">        resize();</span><br><span class="line">    afterNodeInsertion(evict);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>对于写操作的场景：</p>
+<ol>
+<li>先会经过hash计算hashcode然后与size进行&amp;操作，判断存储的位置</li>
+<li>如果存储的位置没有节点，则直接写入</li>
+<li>如果存储的位置有节点，且是树节点，则向树中插入节点</li>
+<li>如果存储的位置有节点，不是树节点（而是普通的链表），则进行头插。但是会判断当前链表的长度，如果超过设置的阈值（默认是8），就会把链表转化成树。</li>
+</ol>
+<p>更新的时候也是上面的操作流程，只不过在对比hashcode相同时，还会检查key是否equals</p>
+<p>读取和删除基本上也是上面的套路。</p>
+<h1 id="为什么非线程安全"><a href="#为什么非线程安全" class="headerlink" title="为什么非线程安全"></a>为什么非线程安全</h1><p>这个主要是因为在rehash的时候由于table[]后面接的是链表，而hashMap还是采用头插的形式。因此如果有不同的线程同时进行rehash，就可能导致链表形成环形，造成死循环。</p>
+<p>具体的可以参考网上的文章：<a href="https://coolshell.cn/articles/9606.html" target="_blank" rel="noopener">https://coolshell.cn/articles/9606.html</a></p>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -196,7 +242,7 @@
 		</ul>
 	</div>
 
-          
+      
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
@@ -209,66 +255,113 @@
 	</div>
 
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://xinghalo.github.io/2017/11/02/HashMap源码分析/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/11/02/HashMap源码分析/" class="archive-article-date">
-  	<time datetime="2018-11-02T04:37:33.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-11-02</time>
-</a>
+<nav id="article-nav">
+  
+    <a href="/2017/11/03/Java中的列表/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          Java中的列表
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/10/29/接口与抽象类/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">接口与抽象类,枚举与泛型</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/11/02/HashMap源码分析/">HashMap源码分析</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">java</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/技术//" class="article-tag-list-link color3">技术</a>
-        		</li>
-      		
-		</ul>
-	</div>
+        
+        
+    </div>
+</aside>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
+
   
   
-    </div></section>
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -291,8 +384,8 @@
 	var yiliaConfig = {
 		mathjax: true,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
@@ -388,6 +481,10 @@ MathJax.Hub.Queue(function() {
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">spring boot</a>
               </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">data</a>
+              </li>
             
             <div class="clearfix"></div>
           </ul>
@@ -436,6 +533,14 @@ MathJax.Hub.Queue(function() {
     	<section class="tools-section tools-section-friends" q-show="friends">
   		
         <ul class="search-ul">
+          
+            <li class="search-li">
+              <a href="http://www.ruanyifeng.com/home.html" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>阮一峰</a>
+            </li>
+          
+            <li class="search-li">
+              <a href="https://leetcode-cn.com/problemset/all/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>LeetCode</a>
+            </li>
           
             <li class="search-li">
               <a href="http://dyingbleed.com/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>李震</a>

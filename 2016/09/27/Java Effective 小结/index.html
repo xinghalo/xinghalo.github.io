@@ -6,20 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://xinghalo.github.io">
-  <title>java.util.Arrays用法例子 | xingoo的blog</title>
+  <title>Java Effective 小结 | xingoo的blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="这个类在日常的开发中，还是非常常用的。今天就总结一下Arrays工具类的常用方法。最常用的就是asList,sort,toStream,equals,copyOf了。另外可以深入学习下Arrays的排序算法，这个还是非常有用的。">
+  <meta name="description" content="本节主要涉及Object中通用的一些方法，比如equals,hashCode,toString,clone,finalize等等">
 <meta name="keywords" content="java">
 <meta property="og:type" content="article">
-<meta property="og:title" content="java.util.Arrays用法例子">
-<meta property="og:url" content="https://xinghalo.github.io/2016/12/26/java-util-Arrays用法例子/index.html">
+<meta property="og:title" content="Java Effective 小结">
+<meta property="og:url" content="https://xinghalo.github.io/2016/09/27/Java Effective 小结/index.html">
 <meta property="og:site_name" content="xingoo的blog">
-<meta property="og:description" content="这个类在日常的开发中，还是非常常用的。今天就总结一下Arrays工具类的常用方法。最常用的就是asList,sort,toStream,equals,copyOf了。另外可以深入学习下Arrays的排序算法，这个还是非常有用的。">
+<meta property="og:description" content="本节主要涉及Object中通用的一些方法，比如equals,hashCode,toString,clone,finalize等等">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-04-28T09:07:41.155Z">
+<meta property="og:updated_time" content="2018-04-28T13:55:00.404Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="java.util.Arrays用法例子">
-<meta name="twitter:description" content="这个类在日常的开发中，还是非常常用的。今天就总结一下Arrays工具类的常用方法。最常用的就是asList,sort,toStream,equals,copyOf了。另外可以深入学习下Arrays的排序算法，这个还是非常有用的。">
+<meta name="twitter:title" content="Java Effective 小结">
+<meta name="twitter:description" content="本节主要涉及Object中通用的一些方法，比如equals,hashCode,toString,clone,finalize等等">
   
     <link rel="alternative" href="/atom.xml" title="xingoo的blog" type="application/atom+xml">
   
@@ -153,50 +153,90 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-java-util-Arrays用法例子" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-Java Effective 小结" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      java.util.Arrays用法例子
+      Java Effective 小结
     </h1>
   
 
         
-        <a href="/2016/12/26/java-util-Arrays用法例子/" class="archive-article-date">
-  	<time datetime="2016-12-26T06:39:18.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-12-26</time>
+        <a href="/2016/09/27/Java Effective 小结/" class="archive-article-date">
+  	<time datetime="2016-09-27T05:04:24.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-09-27</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>这个类在日常的开发中，还是非常常用的。今天就总结一下Arrays工具类的常用方法。最常用的就是asList,sort,toStream,equals,copyOf了。另外可以深入学习下Arrays的排序算法，这个还是非常有用的。<br><a id="more"></a></p>
+        <p>本节主要涉及Object中通用的一些方法，比如<code>equals</code>,<code>hashCode</code>,<code>toString</code>,<code>clone</code>,<code>finalize</code>等等</p>
+<a id="more"></a>
 <blockquote>
-<p>这个类在日常的开发中，还是非常常用的。今天就总结一下Arrays工具类的常用方法。最常用的就是asList,sort,toStream,equals,copyOf了。另外可以深入学习下Arrays的排序算法，这个还是非常有用的。</p>
+<p>本节主要涉及Object中通用的一些方法，比如<code>equals</code>,<code>hashCode</code>,<code>toString</code>,<code>clone</code>,<code>finalize</code>等等</p>
 </blockquote>
-<p>所有的方法都是在下面的类中进行测试的:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ArraysTest</span> </span>&#123;</span><br><span class="line">    String[] array = <span class="keyword">new</span> String[]&#123;<span class="string">"a"</span>,<span class="string">"c"</span>,<span class="string">"2"</span>,<span class="string">"1"</span>,<span class="string">"b"</span>&#125;;</span><br><span class="line">    Integer[] ints = <span class="keyword">new</span> Integer[]&#123;<span class="number">5</span>,<span class="number">1</span>,<span class="number">4</span>,<span class="number">3</span>,<span class="number">2</span>&#125;;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<h4 id="asList"><a href="#asList" class="headerlink" title="asList"></a>asList</h4><p>这个方法可以把数组转换成List,List提供了很多的操作方法，更便于使用。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test1</span><span class="params">()</span></span>&#123;</span><br><span class="line">    List&lt;String&gt; lists = Arrays.asList(array);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<h4 id="sort排序和parallelSort并行排序"><a href="#sort排序和parallelSort并行排序" class="headerlink" title="sort排序和parallelSort并行排序"></a>sort排序和parallelSort并行排序</h4><p>sort比较常用了，根据元素按照自然排序规则排序，也可以设置排序元素的起始位置。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sort</span><span class="params">()</span></span>&#123;</span><br><span class="line">   <span class="comment">/* Arrays.sort(array);</span></span><br><span class="line"><span class="comment">    for(String str : array)&#123;</span></span><br><span class="line"><span class="comment">        System.out.println(str);</span></span><br><span class="line"><span class="comment">    &#125;*/</span></span><br><span class="line">    Arrays.sort(array,<span class="number">2</span>,<span class="number">5</span>);</span><br><span class="line">    System.out.println(Arrays.deepToString(array));<span class="comment">//[a, c, 1, 2, b]</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>parallelSort则采用并行的排序算法排序.但是我自己测试，可能数据量太小，速度上并没有明显的变化。</p>
-<h4 id="binarySearch"><a href="#binarySearch" class="headerlink" title="binarySearch"></a>binarySearch</h4><p>查找目标元素所在的位置，注意需要先进行排序。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">binarySearch</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">//binarySearch需要保证是排好序的</span></span><br><span class="line">    System.out.println(Arrays.binarySearch(array,<span class="string">"c"</span>));<span class="comment">//-6</span></span><br><span class="line">    Arrays.sort(array);</span><br><span class="line">    System.out.println(Arrays.binarySearch(array,<span class="string">"c"</span>));<span class="comment">//4</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<h4 id="copyOf"><a href="#copyOf" class="headerlink" title="copyOf"></a>copyOf</h4><p>拷贝数组，第一种用法，如果目标长度不够，会使用0进行补位。第二种用法，支持拷贝目标起始位置到结束为止的数组。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">copyOf</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">//如果位数不够，需要补位</span></span><br><span class="line">    Integer[] result = Arrays.copyOf(ints,<span class="number">10</span>);</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i : result)&#123;</span><br><span class="line">        System.out.println(i);</span><br><span class="line">    &#125;</span><br><span class="line">    System.out.println(<span class="string">"-----------------------------------------&gt;"</span>);</span><br><span class="line">    <span class="comment">//如果位数够，就取最小的数组</span></span><br><span class="line">    result = Arrays.copyOf(ints,<span class="number">3</span>);</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i : result)&#123;</span><br><span class="line">        System.out.println(i);</span><br><span class="line">    &#125;</span><br><span class="line">    System.out.println(<span class="string">"-----------------------------------------&gt;"</span>);</span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    result = Arrays.copyOfRange(ints,<span class="number">2</span>,<span class="number">4</span>);</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i : result)&#123;</span><br><span class="line">        System.out.println(i);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<h4 id="deepEquals深度比较、deepHashCode生成hashcode、deepToString深度打印"><a href="#deepEquals深度比较、deepHashCode生成hashcode、deepToString深度打印" class="headerlink" title="deepEquals深度比较、deepHashCode生成hashcode、deepToString深度打印"></a>deepEquals深度比较、deepHashCode生成hashcode、deepToString深度打印</h4><p>这几个方法基本都是采用递归的写法使用。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">deepTest</span><span class="params">()</span></span>&#123;</span><br><span class="line">    String[] array2 = <span class="keyword">new</span> String[]&#123;<span class="string">"a"</span>,<span class="string">"c"</span>,<span class="string">"2"</span>,<span class="string">"1"</span>,<span class="string">"b"</span>&#125;;</span><br><span class="line">    System.out.println(Arrays.deepEquals(array,array2));<span class="comment">//深度比较两个数组是否相同</span></span><br><span class="line"></span><br><span class="line">    System.out.println(Arrays.deepHashCode(array));</span><br><span class="line">    System.out.println(Arrays.deepHashCode(array2));<span class="comment">//如果两个数组deepEquals，那么他们的hashcode一定相同</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//格式化输出数组</span></span><br><span class="line">    System.out.println(Arrays.deepToString(array));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<h4 id="equals比较"><a href="#equals比较" class="headerlink" title="equals比较"></a>equals比较</h4><p>对比两个数组是否相等<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">equals</span><span class="params">()</span></span>&#123;</span><br><span class="line">    String[] array2 = <span class="keyword">new</span> String[]&#123;<span class="string">"a"</span>,<span class="string">"c"</span>,<span class="string">"2"</span>,<span class="string">"1"</span>,<span class="string">"b"</span>&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//1 对比引用是否相同</span></span><br><span class="line">    <span class="comment">//2 对比是否存在null</span></span><br><span class="line">    <span class="comment">//3 对比长度是否相同</span></span><br><span class="line">    <span class="comment">//4 挨个元素对比</span></span><br><span class="line">    System.out.println(Arrays.equals(array,array2));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<h4 id="fill"><a href="#fill" class="headerlink" title="fill"></a>fill</h4><p>基于目标元素填充数组</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">fill</span><span class="params">()</span></span>&#123;</span><br><span class="line">    Arrays.fill(array,<span class="string">"test"</span>);</span><br><span class="line">    System.out.println(Arrays.deepToString(array));<span class="comment">//[test, test, test, test, test]</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="toString-NaN"><a href="#toString-NaN" class="headerlink" title="toString"></a>toString</h4><p>打印数组元素</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">string</span><span class="params">()</span></span>&#123;</span><br><span class="line">    System.out.println(Arrays.toString(array));<span class="comment">//[a, c, 2, 1, b]</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="toStream"><a href="#toStream" class="headerlink" title="toStream"></a>toStream</h4><p>把数组转换成stream,然后可以使用java8的stream特性了。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">toStream</span><span class="params">()</span></span>&#123;</span><br><span class="line">    Arrays.stream(array).forEach(s-&gt; System.out.println(s));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="parallelPrefix"><a href="#parallelPrefix" class="headerlink" title="parallelPrefix"></a>parallelPrefix</h4><p>这个有点像spark的reduceByKey，即根据传入的方法一次计算：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">parallelPrefix</span><span class="params">()</span></span>&#123;</span><br><span class="line">    Arrays.parallelPrefix(ints,(x,y)-&gt;(x+y));</span><br><span class="line">    System.out.println(Arrays.deepToString(ints));<span class="comment">//[5, 6, 10, 13, 15]</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="parallelSetAll"><a href="#parallelSetAll" class="headerlink" title="parallelSetAll"></a>parallelSetAll</h4><p>这个方法相当于stream.map会挨个元素遍历执行方法</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">parallelSetAll</span><span class="params">()</span></span>&#123;</span><br><span class="line">    Arrays.parallelSetAll(ints,x-&gt;x*x);</span><br><span class="line">    System.out.println(Arrays.toString(ints));<span class="comment">//[0, 1, 4, 9, 16]</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="setAll"><a href="#setAll" class="headerlink" title="setAll"></a>setAll</h4><p>这个方法与上面类似，只不过不是并行的</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAll</span><span class="params">()</span></span>&#123;</span><br><span class="line">    Arrays.setAll(ints,x-&gt;x*<span class="number">2</span>);</span><br><span class="line">    System.out.println(Arrays.toString(ints));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="覆盖equals时请遵守通用约定"><a href="#覆盖equals时请遵守通用约定" class="headerlink" title="覆盖equals时请遵守通用约定"></a>覆盖equals时请遵守通用约定</h2><p>equals方法实现的等价关系：</p>
+<ul>
+<li>自反性：对于所有的非null，a=a</li>
+<li>对称性：a=b,则b=a</li>
+<li>传递性：a=b,b=c,则a=c</li>
+<li>一致性：对于没有被修改的ab，如果a=b，则一直a=b</li>
+<li>非空性：对于任何非Null,a!=null</li>
+</ul>
+<p>高质量equals方法的诀窍：</p>
+<ul>
+<li>使用==操作符检查——“参数是否为这个对象的引用”</li>
+<li>使用instanceof检查——“参数是否为正确的类型”</li>
+<li>参数转换成正确的类型</li>
+<li>对于每个关键域，检查参数中的域是否与对象的域相匹配</li>
+<li>写完后，问自己：是否对称、是否传递、是否一致</li>
+</ul>
+<p>忠告：</p>
+<ul>
+<li>覆盖equlas时，总是覆盖hashCode</li>
+<li>不要企图让equals过于智能</li>
+<li>不要将equals中的Object对象换成其他的类型</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">@Override public boolean equals(Object o)&#123;</span><br><span class="line">    if(o == this)</span><br><span class="line">        return true;</span><br><span class="line">    if(!(o instanceof XX))</span><br><span class="line">        return false;</span><br><span class="line">    XX xx = (XX)o;</span><br><span class="line">    return xx.x.equals(o.x);//TODO</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="覆盖equals时总是要覆盖hashCode"><a href="#覆盖equals时总是要覆盖hashCode" class="headerlink" title="覆盖equals时总是要覆盖hashCode"></a>覆盖equals时总是要覆盖hashCode</h2><p>hashCode主要用于放在HashMap，HashSet，HashTable中时，计算hash值。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">@Override public int hashCode()&#123;</span><br><span class="line">    int result = 17;</span><br><span class="line">    result = 31*result+eee;</span><br><span class="line">    result = 31*result+xxx;</span><br><span class="line">    return result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中17是随便写的，31是有说道的，因为31是个奇素数，并且:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">31*i==(i&lt;&lt;5)-i</span><br></pre></td></tr></table></figure></p>
+<p>这样JVM在优化的时候效率会更高。</p>
+<h2 id="始终覆盖toString"><a href="#始终覆盖toString" class="headerlink" title="始终覆盖toString()"></a>始终覆盖toString()</h2><p>因为toString方法应该返回对象的关键信息</p>
+<h2 id="谨慎的覆盖clone"><a href="#谨慎的覆盖clone" class="headerlink" title="谨慎的覆盖clone"></a>谨慎的覆盖clone</h2><p>应该满足：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">x.clone() != x</span><br><span class="line">x.clone().getClass() == x.getClass()</span><br><span class="line">x.clone().equals(x)</span><br></pre></td></tr></table></figure></p>
+<p>另外clone方法相当于另一种构建器，不应该对原来的对象产生影响。</p>
+<h2 id="考虑实现Comparable接口"><a href="#考虑实现Comparable接口" class="headerlink" title="考虑实现Comparable接口"></a>考虑实现Comparable接口</h2><p>常用的List等等可以通过实现Comparable接口进行排序：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public interface Comparable&lt;T&#123;</span><br><span class="line">    int compareTo(T t);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>当对象小于，等于或者大于时，应该返回一个负整数，零或者正整数。</p>
+<h2 id="考虑用静态工厂方法代替构造器"><a href="#考虑用静态工厂方法代替构造器" class="headerlink" title="考虑用静态工厂方法代替构造器"></a>考虑用静态工厂方法代替构造器</h2><p>使用静态工厂的优势：</p>
+<ul>
+<li>有名称</li>
+<li>不必每次调用的时候都创建一个新的对象</li>
+<li>返回原返回类型的任何子类型对象</li>
+<li>在创建参数化类型实例时，代码更加简洁。</li>
+</ul>
+<p>使用静态工厂的缺点：</p>
+<ul>
+<li>类如果不包含公有的或者受保护的构造器，就不能被子类化</li>
+<li>与其他的静态方法实际上没有任何区别</li>
+</ul>
+<p>举个例子：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Apple</span></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Apple</span><span class="params">(String type)</span></span>&#123;&#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Apple <span class="title">newInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Apple(<span class="string">"qing"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//使用的时候直接newInstance就可以</span></span><br><span class="line">Apple.newInstance();</span><br></pre></td></tr></table></figure></p>
+<p>常用的静态工厂名称：<code>valueOf</code>,<code>of</code>,<code>getInstance</code>,<code>newInstance</code>,<code>getType</code>,<code>newType</code>.</p>
+<h2 id="遇到多个构造器参数时考虑使用构建器"><a href="#遇到多个构造器参数时考虑使用构建器" class="headerlink" title="遇到多个构造器参数时考虑使用构建器"></a>遇到多个构造器参数时考虑使用构建器</h2><p>如果参数很多，在使用的时候也会很繁琐。比如<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">new Person(name,age,address,tel,gender);</span><br></pre></td></tr></table></figure></p>
+<p>当参数大于三个的时候，就可以考虑使用构建器了，特别实在参数可选的时候。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public class Person&#123;</span><br><span class="line">    public Person name(String name)&#123;return this;&#125;</span><br><span class="line">    public Person age(String age)&#123;return this;&#125;</span><br><span class="line">    public Person gender(String gender)&#123;return this;&#125;</span><br><span class="line">    public Person tel(String tel)&#123;return this;&#125;</span><br><span class="line">&#125;</span><br><span class="line">//使用的时候可以这样用</span><br><span class="line">(new Person()).name(&quot;xingoo&quot;).age(30).gender(&quot;male&quot;).tel(13333333333);</span><br></pre></td></tr></table></figure></p>
+<p>使用构建器的缺点就是代码会比较冗长。</p>
+<h2 id="用私有构造器或者枚举类型强化Singleton属性"><a href="#用私有构造器或者枚举类型强化Singleton属性" class="headerlink" title="用私有构造器或者枚举类型强化Singleton属性"></a>用私有构造器或者枚举类型强化Singleton属性</h2><p>第一种方式，是饿汉模式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">publci class Elvis&#123;</span><br><span class="line">    public static final Elvis INSTANCE = new Elvis();</span><br><span class="line">    private Elvis()&#123;&#125;</span><br><span class="line">    public void xxx()&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>另一种方式，属于懒汉模式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public class Elvis&#123;</span><br><span class="line">    private static final Elvis INSTANCE = new Elvis();</span><br><span class="line">    private Elvis()&#123;&#125;</span><br><span class="line">    public static Elvis getInstance()&#123;</span><br><span class="line">        return INSTANCE;</span><br><span class="line">    &#125;</span><br><span class="line">    xxx</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="通过私有构造器强化不可实例化的能力"><a href="#通过私有构造器强化不可实例化的能力" class="headerlink" title="通过私有构造器强化不可实例化的能力"></a>通过私有构造器强化不可实例化的能力</h2><p>有一些比如工具类，是不想被实例化的，可以使用私有的构造方法，来避免实例化:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public class XXUtil&#123;</span><br><span class="line">    private XXUtil()&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>缺点是这样的类无法被子类化。</p>
+<h2 id="避免创建不必要的对象"><a href="#避免创建不必要的对象" class="headerlink" title="避免创建不必要的对象"></a>避免创建不必要的对象</h2><p>尽量应该避免创建不必要的对象，比如:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">String s = new String(&quot;xxx&quot;);</span><br></pre></td></tr></table></figure></p>
+<p>其实创建了两个字符串对象。</p>
+<p>尽量优先使用long这种基本类型。</p>
+<h2 id="消除过期的对象引用"><a href="#消除过期的对象引用" class="headerlink" title="消除过期的对象引用"></a>消除过期的对象引用</h2><p>常见的是在栈操作，出栈操作并不意味着释放对象。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public Object pop()&#123;</span><br><span class="line">    if(size == 0)</span><br><span class="line">        throw new EmptyStackException();</span><br><span class="line">    Object result = elements[--size];</span><br><span class="line">    elements[size] = null;</span><br><span class="line">    return result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="避免使用终结方法"><a href="#避免使用终结方法" class="headerlink" title="避免使用终结方法"></a>避免使用终结方法</h2><p>finalizer方法是再垃圾回收的时候触发的，因此不能准确的知道终结方法调用的时间。因此最好是在try catch finally的时候释放对象。</p>
+<p>这种释放对象的时机，叫做显示终止方法。</p>
 
       
 
@@ -298,7 +338,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=https://xinghalo.github.io/2016/12/26/java-util-Arrays用法例子/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=https://xinghalo.github.io/2016/09/27/Java Effective 小结/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -312,18 +352,18 @@
   
 <nav id="article-nav">
   
-    <a href="/2016/12/30/基于cat的分布式调用链追踪/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2016/10/19/IOUtils使用指南/" id="article-nav-newer" class="article-nav-link-wrap">
       <i class="icon-circle-left"></i>
       <div class="article-nav-title">
         
-          基于cat的分布式调用链追踪
+          IOUtils使用指南
         
       </div>
     </a>
   
   
-    <a href="/2016/11/27/基于Spring Mvc实现的Excel文件上传下载/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">基于Spring Mvc实现的Excel文件上传下载</div>
+    <a href="/2016/09/23/自己编写的数据交换工具——Oracle到Elasticsearch/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">自己编写的数据交换工具——Oracle到Elasticsearch</div>
       <i class="icon-circle-right"></i>
     </a>
   
